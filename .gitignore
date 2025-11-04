@@ -1,0 +1,14 @@
+*.pyc
+*.http
+pid
+*.log
+*__pycache__
+*logs
+db_config.py
+secrets.py
+test.py
+*imgs
+*vscode
+*test_files
+*temp
+*node_modules
