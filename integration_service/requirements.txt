@@ -1,0 +1,68 @@
+Flask==3.0.0
+Flask-CORS==4.0.0
+Flask-Marshmallow==1.2.0
+Flask-JWT-Extended==4.6.0
+flask-smorest==0.42.3
+marshmallow==3.20.1
+redis==5.0.1
+requests==2.31.0
+PyYAML==6.0.1
+cryptography==41.0.7
+python-dotenv==1.0.0
+waitress==2.1.2
+
+# 数据库相关依赖
+SQLAlchemy==2.0.23         # ORM 框架
+Flask-SQLAlchemy==3.1.1    # Flask SQLAlchemy 集成
+PyMySQL==1.1.0             # MySQL 连接器
+alembic==1.13.1            # 数据库迁移工具
+
+# API設計和文檔處理依賴
+Pillow==10.1.0            # 圖像處理
+svglib==1.5.1             # SVG 處理
+reportlab==4.0.8          # PDF 生成
+weasyprint==60.2          # HTML to PDF 轉換
+
+# 新增依賴項目 - 增強功能
+pyotp==2.9.0              # TOTP 雙重認證
+qrcode==7.4.2             # 二維碼生成
+passlib==1.7.4            # 密碼哈希增強
+email-validator==2.1.0    # 郵箱驗證增強
+phonenumbers==8.13.27     # 手機號驗證
+validators==0.22.0        # 通用驗證器
+argon2-cffi==23.1.0       # Argon2密碼哈希 (安全性更高)
+bcrypt==4.1.2             # BCrypt密碼哈希
+itsdangerous==2.1.2       # 安全簽名和序列化
+
+# API規範處理和驗證
+jsonschema==4.20.0        # JSON Schema 驗證
+openapi-spec-validator==0.7.1  # OpenAPI 規範驗證
+swagger-spec-validator==3.0.3  # Swagger 規範驗證
+prance==23.6.21.0         # OpenAPI 規範解析和驗證
+
+# GraphQL 支持
+graphql-core==3.2.3       # GraphQL 核心庫
+graphene==3.3             # GraphQL schema 構建
+
+# 代碼生成支持
+jinja2==3.1.2             # 模板引擎 (代碼生成)
+black==23.12.1            # Python 代碼格式化
+autopep8==2.0.4           # Python 代碼格式化
+prettier==0.0.7           # JavaScript 代碼格式化
+
+# HTTP 測試和Mock
+responses==0.24.1         # HTTP 響應Mock
+httpx==0.25.2             # 現代 HTTP 客戶端
+faker==20.1.0             # 測試數據生成
+
+# 系統監控
+psutil==5.9.6             # 系統資源監控
+
+# 數據分析和處理
+pandas==2.1.4             # 數據分析和處理
+numpy==1.26.2             # 數值計算和統計分析
+
+# API文檔和可視化
+markdown==3.5.1           # Markdown 處理
+pygments==2.17.2          # 語法高亮
+beautifulsoup4==4.12.2    # HTML 解析
