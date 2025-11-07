@@ -23,7 +23,7 @@ def init_mongodb(app):
         db_instance = mongo.db
         
         # 測試連接
-        db_instance.admin.command('ping')
+        db_instance.command('ping')
         logger.info("MongoDB 連接成功")
         
         # 初始化索引

@@ -14,7 +14,7 @@ waitress==2.1.2
 # MongoDB 相關依賴
 Flask-PyMongo==2.3.0      # Flask MongoDB 集成
 pymongo==4.6.1            # MongoDB 驅動
-bson==0.5.10              # BSON 數據格式
+
 
 # API設計和文檔處理依賴
 Pillow==10.1.0            # 圖像處理
