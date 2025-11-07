@@ -16,48 +16,78 @@ export interface User {
   updatedAt: string;
 }
 
-// 群组相关类型
+// 团队相关类型
+export type TeamRole = 'owner' | 'admin' | 'member';
+
+export interface TeamSettings {
+  allowMemberInvite: boolean;
+  allowMemberProjectCreate: boolean;
+  requireApprovalForJoin: boolean;
+  defaultMemberRole: 'member' | 'viewer';
+  notifications: {
+    newMember: boolean;
+    projectUpdates: boolean;
+    memberActivity: boolean;
+  };
+}
+
 export interface Team {
   id: string;
   name: string;
   description?: string;
-  avatarUrl?: string;
+  avatar?: string;
   visibility: 'public' | 'private' | 'internal';
-  maxMembers: number;
-  settings: Record<string, any>;
-  autoApproveJoin: boolean;
-  allowMemberInvite: boolean;
-  requireApprovalForProjects: boolean;
-  defaultProjectVisibility: 'public' | 'private';
+  joinPolicy: 'open' | 'invite_only' | 'request';
+  status: 'active' | 'archived' | 'pending';
+  memberCount?: number;
+  projectCount?: number;
+  activityScore?: number;
+  settings?: TeamSettings;
+  lastActivityAt?: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  members?: TeamMember[];
 }
 
 export interface TeamMember {
   id: string;
   teamId: string;
   userId: string;
-  role: 'owner' | 'admin' | 'member';
+  name: string;
+  email?: string;
+  avatar?: string;
+  role: TeamRole;
+  status: 'active' | 'pending' | 'inactive';
+  bio?: string;
+  phone?: string;
   invitedBy?: string;
   joinedAt: string;
-  lastActiveAt: string;
+  lastActiveAt?: string;
+  projectCount?: number;
+  contributionScore?: number;
   user?: User;
 }
 
-export interface TeamInvitation {
+export interface TeamActivity {
   id: string;
   teamId: string;
-  inviteeEmail: string;
-  inviteeUserId?: string;
-  invitedRole: 'admin' | 'member';
-  invitationToken: string;
-  invitedBy: string;
-  expiresAt: string;
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
-  message?: string;
+  type: string;
+  description: string;
+  actor: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  metadata?: {
+    projectName?: string;
+    newRole?: string;
+    target?: string;
+    repository?: string;
+    location?: string;
+    details?: string;
+  };
   createdAt: string;
-  acceptedAt?: string;
 }
 
 // 项目相关类型
@@ -66,13 +96,19 @@ export interface Project {
   name: string;
   description?: string;
   teamId: string;
+  type: 'web' | 'mobile' | 'api' | 'desktop' | 'library';
   visibility: 'public' | 'private';
-  status: 'active' | 'archived' | 'deleted';
+  status: 'active' | 'completed' | 'paused' | 'archived' | 'planning';
+  priority?: 'high' | 'medium' | 'low';
+  progress?: number;
+  memberCount?: number;
+  dueDate?: string;
+  lastActivityAt?: string;
   templateId?: string;
-  settings: Record<string, any>;
-  allowMemberEdit: boolean;
-  allowExternalView: boolean;
-  allowExternalComment: boolean;
+  settings?: Record<string, any>;
+  allowMemberEdit?: boolean;
+  allowExternalView?: boolean;
+  allowExternalComment?: boolean;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
