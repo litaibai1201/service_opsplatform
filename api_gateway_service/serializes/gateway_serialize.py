@@ -73,7 +73,7 @@ class ServiceInstanceRegisterSchema(Schema):
     weight = fields.Int(missing=100, validate=validate.Range(min=1, max=1000))
     health_check_url = fields.Str(validate=validate.Length(max=500), allow_none=True)
     health_check_interval_seconds = fields.Int(missing=30, validate=validate.Range(min=5, max=300))
-    _metadata = fields.Dict(missing=None, allow_none=True)
+    instance_metadata = fields.Dict(missing=None, allow_none=True)
 
 
 class ServiceInstanceUpdateSchema(Schema):

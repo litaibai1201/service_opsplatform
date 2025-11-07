@@ -358,7 +358,7 @@ class GatewayHealthApi(MethodView):
 class DynamicRouteApi(BaseGatewayView):
     """动态路由转发API - 处理所有业务请求"""
 
-    def dispatch_request(self, path):
+    def _handle_request(self, path):
         """处理所有类型的HTTP请求"""
         try:
             # 跳过特殊路径
@@ -429,6 +429,30 @@ class DynamicRouteApi(BaseGatewayView):
                 return True
         
         return False
+
+    def get(self, path):
+        """处理GET请求"""
+        return self._handle_request(path)
+    
+    def post(self, path):
+        """处理POST请求"""
+        return self._handle_request(path)
+    
+    def put(self, path):
+        """处理PUT请求"""
+        return self._handle_request(path)
+    
+    def delete(self, path):
+        """处理DELETE请求"""
+        return self._handle_request(path)
+    
+    def patch(self, path):
+        """处理PATCH请求"""
+        return self._handle_request(path)
+    
+    def options(self, path):
+        """处理OPTIONS请求"""
+        return self._handle_request(path)
 
 
 # ==================== 批量操作接口 ====================

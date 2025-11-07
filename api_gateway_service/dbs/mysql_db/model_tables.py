@@ -92,7 +92,7 @@ class ServiceInstanceModel(BaseMixinModel):
     last_health_check = db.Column(db.String(19), default=CommonTools.get_now, comment="最後健康檢查時間")
     health_check_url = db.Column(db.String(500), comment="健康檢查URL")
     health_check_interval_seconds = db.Column(db.Integer, default=30, comment="健康檢查間隔(秒)")
-    _metadata = db.Column(db.JSON, comment="元數據")
+    instance_metadata = db.Column(db.JSON, comment="元數據")
     registered_at = db.Column(db.String(19), default=CommonTools.get_now, comment="註冊時間")
 
     # 索引和唯一约束
@@ -135,7 +135,7 @@ class ApiCallLogModel(BaseModel):
     request_id = db.Column(db.String(36), unique=True, nullable=False, comment="請求ID")
     user_id = db.Column(db.String(36), comment="用戶ID")
     method = db.Column(db.String(10), nullable=False, comment="HTTP方法")
-    path = db.Column(db.String(1000), nullable=False, comment="請求路徑")
+    path = db.Column(db.String(500), nullable=False, comment="請求路徑")
     query_params = db.Column(db.JSON, comment="查詢參數")
     headers = db.Column(db.JSON, comment="請求頭")
     ip_address = db.Column(db.String(45), comment="IP地址")
