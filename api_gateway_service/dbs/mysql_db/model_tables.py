@@ -92,7 +92,7 @@ class ServiceInstanceModel(BaseMixinModel):
     last_health_check = db.Column(db.String(19), default=CommonTools.get_now, comment="最後健康檢查時間")
     health_check_url = db.Column(db.String(500), comment="健康檢查URL")
     health_check_interval_seconds = db.Column(db.Integer, default=30, comment="健康檢查間隔(秒)")
-    metadata = db.Column(db.JSON, comment="元數據")
+    _metadata = db.Column(db.JSON, comment="元數據")
     registered_at = db.Column(db.String(19), default=CommonTools.get_now, comment="註冊時間")
 
     # 索引和唯一约束

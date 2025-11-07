@@ -224,7 +224,7 @@ class GatewayController:
                 'instance_status': 'healthy',
                 'health_check_url': data.get('health_check_url'),
                 'health_check_interval_seconds': int(data.get('health_check_interval_seconds', 30)),
-                'metadata': data.get('metadata')
+                '_metadata': data.get('_metadata')
             }
             
             instance_obj = ServiceInstanceModel(**service_data)
