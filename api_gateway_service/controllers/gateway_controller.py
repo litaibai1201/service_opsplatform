@@ -6,6 +6,7 @@
 @作者: LiDong
 """
 
+import random
 import uuid
 import time
 import requests
@@ -13,6 +14,7 @@ import traceback
 from datetime import datetime, timedelta
 from typing import Tuple, Dict, Any, Optional, List
 from flask import request, g
+from sqlalchemy import and_
 
 from common.common_tools import CommonTools
 from dbs.mysql_db import DBFunction
@@ -20,6 +22,7 @@ from dbs.mysql_db.model_tables import (
     ApiRouteModel, ServiceInstanceModel, RateLimitRecordModel,
     ApiCallLogModel, CircuitBreakerModel, PermissionModel
 )
+from integration_service.dbs.mysql_db import db
 from models.gateway_model import (
     OperApiRouteModel, OperServiceInstanceModel, OperRateLimitRecordModel,
     OperApiCallLogModel, OperCircuitBreakerModel, OperPermissionModel
