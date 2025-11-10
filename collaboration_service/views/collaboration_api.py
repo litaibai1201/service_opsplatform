@@ -6,6 +6,7 @@
 @作者: LiDong
 """
 
+from datetime import datetime
 from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint
@@ -25,9 +26,9 @@ from serializes.collaboration_serialize import (
     DocumentLockResponseSchema, CollaborationStatisticsResponseSchema,
     ActiveUsersResponseSchema
 )
-from serializes.response_serialize import RspMsgDict
+from serializes.response_serialize import RspMsgDictSchema
 from controllers.collaboration_controller import collaboration_controller
-from common.common_method import success_response_result, fail_response_result
+from common.common_method import response_result, fail_response_result
 from loggers import logger
 
 
@@ -46,7 +47,7 @@ class JoinCollaborationAPI(MethodView):
     """加入協作會話API"""
     
     @blp.arguments(JoinCollaborationSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='加入協作會話')
     @jwt_required()
     def post(self, join_data):
@@ -59,7 +60,7 @@ class JoinCollaborationAPI(MethodView):
             )
             
             if success:
-                return success_response_result(data=result, msg="加入協作會話成功")
+                return response_result(content=result, msg="加入協作會話成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -73,7 +74,7 @@ class LeaveCollaborationAPI(MethodView):
     """離開協作會話API"""
     
     @blp.arguments(LeaveCollaborationSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='離開協作會話')
     @jwt_required()
     def post(self, leave_data):
@@ -84,7 +85,7 @@ class LeaveCollaborationAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg="離開協作會話成功")
+                return response_result(msg="離開協作會話成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -98,7 +99,7 @@ class CollaborationSessionsAPI(MethodView):
     """協作會話狀態API"""
     
     @blp.arguments(DocumentQuerySchema, location='query')
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='獲取文檔協作狀態')
     @jwt_required()
     def get(self, query_args, document_id):
@@ -112,8 +113,8 @@ class CollaborationSessionsAPI(MethodView):
             )
             
             if success:
-                return success_response_result(
-                    data={'sessions': result, 'total_count': len(result)},
+                return response_result(
+                    content={'sessions': result, 'total_count': len(result)},
                     msg="獲取協作狀態成功"
                 )
             else:
@@ -143,8 +144,8 @@ class ActiveUsersAPI(MethodView):
             )
             
             if success:
-                return success_response_result(
-                    data={
+                return response_result(
+                    content={
                         'sessions': result,
                         'total_count': len(result),
                         'last_updated': None
@@ -164,7 +165,7 @@ class HeartbeatAPI(MethodView):
     """心跳API"""
     
     @blp.arguments(HeartbeatSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='發送心跳保持會話')
     @jwt_required()
     def post(self, heartbeat_data):
@@ -177,7 +178,7 @@ class HeartbeatAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg="心跳成功")
+                return response_result(msg="心跳成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -207,7 +208,7 @@ class OperationsAPI(MethodView):
             )
             
             if success:
-                return success_response_result(data=result, msg="操作提交成功")
+                return response_result(content=result, msg="操作提交成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -221,7 +222,7 @@ class OperationHistoryAPI(MethodView):
     """操作歷史API"""
     
     @blp.arguments(OperationHistoryQuerySchema, location='query')
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='獲取操作歷史')
     @jwt_required()
     def get(self, query_args, document_id):
@@ -235,8 +236,8 @@ class OperationHistoryAPI(MethodView):
             )
             
             if success:
-                return success_response_result(
-                    data={'operations': result, 'count': len(result)},
+                return response_result(
+                    content={'operations': result, 'count': len(result)},
                     msg="獲取操作歷史成功"
                 )
             else:
@@ -252,7 +253,7 @@ class CursorUpdateAPI(MethodView):
     """光標更新API"""
     
     @blp.arguments(CursorUpdateSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='更新光標位置')
     @jwt_required()
     def post(self, cursor_data):
@@ -264,7 +265,7 @@ class CursorUpdateAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg="光標位置更新成功")
+                return response_result(msg="光標位置更新成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -278,7 +279,7 @@ class SelectionUpdateAPI(MethodView):
     """選擇範圍更新API"""
     
     @blp.arguments(SelectionUpdateSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='更新選擇範圍')
     @jwt_required()
     def post(self, selection_data):
@@ -290,7 +291,7 @@ class SelectionUpdateAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg="選擇範圍更新成功")
+                return response_result(msg="選擇範圍更新成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -306,7 +307,7 @@ class ResolveConflictAPI(MethodView):
     """解決衝突API"""
     
     @blp.arguments(ResolveConflictSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='解決衝突')
     @jwt_required()
     def post(self, conflict_data):
@@ -319,7 +320,7 @@ class ResolveConflictAPI(MethodView):
             )
             
             if success:
-                return success_response_result(data=result, msg="衝突解決成功")
+                return response_result(content=result, msg="衝突解決成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -333,7 +334,7 @@ class ConflictsAPI(MethodView):
     """衝突列表API"""
     
     @blp.arguments(DocumentQuerySchema, location='query')
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='獲取衝突列表')
     @jwt_required()
     def get(self, query_args, document_id):
@@ -347,8 +348,8 @@ class ConflictsAPI(MethodView):
             )
             
             if success:
-                return success_response_result(
-                    data={'conflicts': result, 'count': len(result)},
+                return response_result(
+                    content={'conflicts': result, 'count': len(result)},
                     msg="獲取衝突列表成功"
                 )
             else:
@@ -381,7 +382,7 @@ class LockDocumentAPI(MethodView):
             )
             
             if success:
-                return success_response_result(data=result, msg="文檔鎖定成功")
+                return response_result(content=result, msg="文檔鎖定成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -395,7 +396,7 @@ class UnlockDocumentAPI(MethodView):
     """解鎖文檔API"""
     
     @blp.arguments(UnlockDocumentSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='解鎖文檔或元素')
     @jwt_required()
     def post(self, unlock_data):
@@ -407,7 +408,7 @@ class UnlockDocumentAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg="文檔解鎖成功")
+                return response_result(msg="文檔解鎖成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -421,7 +422,7 @@ class DocumentLocksAPI(MethodView):
     """文檔鎖定狀態API"""
     
     @blp.arguments(DocumentQuerySchema, location='query')
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='獲取鎖定狀態')
     @jwt_required()
     def get(self, query_args, document_id):
@@ -435,8 +436,8 @@ class DocumentLocksAPI(MethodView):
             )
             
             if success:
-                return success_response_result(
-                    data={'locks': result, 'count': len(result)},
+                return response_result(
+                    content={'locks': result, 'count': len(result)},
                     msg="獲取鎖定狀態成功"
                 )
             else:
@@ -452,7 +453,7 @@ class ForceUnlockAPI(MethodView):
     """強制解鎖API"""
     
     @blp.arguments(UnlockDocumentSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='強制解鎖')
     @jwt_required()
     def post(self, unlock_data):
@@ -464,7 +465,7 @@ class ForceUnlockAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg=result)
+                return response_result(msg=result)
             else:
                 return fail_response_result(msg=result)
                 
@@ -479,7 +480,7 @@ class ForceUnlockAPI(MethodView):
 class CollaborationPermissionsAPI(MethodView):
     """協作權限API"""
     
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='獲取協作權限')
     @jwt_required()
     def get(self, document_id):
@@ -490,7 +491,7 @@ class CollaborationPermissionsAPI(MethodView):
             )
             
             if success:
-                return success_response_result(data=result, msg="獲取協作權限成功")
+                return response_result(content=result, msg="獲取協作權限成功")
             else:
                 return fail_response_result(msg=result)
                 
@@ -504,7 +505,7 @@ class GrantPermissionAPI(MethodView):
     """授予權限API"""
     
     @blp.arguments(GrantPermissionSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='授予協作權限')
     @jwt_required()
     def post(self, permission_data):
@@ -517,7 +518,7 @@ class GrantPermissionAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg=result)
+                return response_result(msg=result)
             else:
                 return fail_response_result(msg=result)
                 
@@ -531,7 +532,7 @@ class RevokePermissionAPI(MethodView):
     """撤銷權限API"""
     
     @blp.arguments(RevokePermissionSchema)
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='撤銷協作權限')
     @jwt_required()
     def post(self, permission_data):
@@ -543,7 +544,7 @@ class RevokePermissionAPI(MethodView):
             )
             
             if success:
-                return success_response_result(msg=result)
+                return response_result(msg=result)
             else:
                 return fail_response_result(msg=result)
                 
@@ -573,8 +574,8 @@ class CollaborationStatisticsAPI(MethodView):
             )
             
             if success:
-                return success_response_result(
-                    data={'statistics': result, 'count': len(result)},
+                return response_result(
+                    content={'statistics': result, 'count': len(result)},
                     msg="獲取協作統計成功"
                 )
             else:
@@ -591,13 +592,13 @@ class CollaborationStatisticsAPI(MethodView):
 class HealthCheckAPI(MethodView):
     """健康檢查API"""
     
-    @blp.response(200, RspMsgDict)
+    @blp.response(200, RspMsgDictSchema)
     @blp.doc(summary='健康檢查')
     def get(self):
         """健康檢查"""
         try:
-            return success_response_result(
-                data={
+            return response_result(
+                content={
                     'status': 'healthy',
                     'service': 'collaboration_service',
                     'timestamp': datetime.utcnow().isoformat()
