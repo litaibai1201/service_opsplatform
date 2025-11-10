@@ -20,7 +20,6 @@ from dbs.mongodb import init_mongodb
 from controllers.db_design_controller import init_db_design_controller
 from loggers import logger
 from views.db_design_api import blp as db_design_blp
-from views.internal_api import blp as internal_blp
 
 # from waitress import serve
 
@@ -111,7 +110,6 @@ def create_app(app):
     # 注册蓝图
     api = Api(app)
     api.register_blueprint(db_design_blp)
-    api.register_blueprint(internal_blp)
     return app
 
 

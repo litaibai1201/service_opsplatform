@@ -25,5 +25,12 @@ db_config_dict = {
         "port": 6379,
         "database_name": "0",
         "password": db_account.get("redis", {}).get("password", ""),
+    },
+    "mongodb": {
+        "host": "114.33.127.60",
+        "port": 27017,
+        "database_name": "automl",
+        "username": db_account["mongodb"]["username"],
+        "password": db_account["mongodb"]["password"],
     }
 }

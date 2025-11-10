@@ -22,7 +22,7 @@ from dbs.mysql_db.model_tables import (
     ApiRouteModel, ServiceInstanceModel, RateLimitRecordModel,
     ApiCallLogModel, CircuitBreakerModel, PermissionModel
 )
-from integration_service.dbs.mysql_db import db
+from dbs.mysql_db import db
 from models.gateway_model import (
     OperApiRouteModel, OperServiceInstanceModel, OperRateLimitRecordModel,
     OperApiCallLogModel, OperCircuitBreakerModel, OperPermissionModel
