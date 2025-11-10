@@ -5,7 +5,3 @@
 @時間: 2025-01-09
 @作者: LiDong
 """
-
-from .search_controller import search_controller, init_search_controller
-
-__all__ = ['search_controller', 'init_search_controller']

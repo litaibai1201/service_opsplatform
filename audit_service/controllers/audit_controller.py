@@ -576,7 +576,7 @@ class AuditController:
                 'task_name': export_data.get('task_name', f"審計日誌導出_{CommonTools.get_now()}"),
                 'export_type': export_data.get('export_type', 'csv'),
                 'filter_conditions': export_data.get('filters'),
-                'export_fields': export_data.get('fields'),
+                'export_fields': export_data.get('export_fields'),
                 'created_by': export_data['created_by']
             }
             

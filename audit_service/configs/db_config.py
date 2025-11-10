@@ -16,7 +16,7 @@ db_config_dict = {
     "mysql_db": {
         "host": "114.33.127.60",
         "port": 3306,
-        "database_name": "search_service",
+        "database_name": "api_gateway_service",
         "username": db_account["mysql_db"]["username"],
         "password": db_account["mysql_db"]["password"],
     },

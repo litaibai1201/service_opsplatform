@@ -150,7 +150,7 @@ class AuditExportSchema(Schema):
     task_name = fields.Str(allow_none=True, validate=validate.Length(max=255), metadata={"description": "任務名稱"})
     export_type = fields.Str(missing='csv', validate=validate.OneOf(['csv', 'excel', 'json', 'pdf']), metadata={"description": "導出類型"})
     filters = fields.Nested(AuditLogQuerySchema, allow_none=True, metadata={"description": "過濾條件"})
-    fields = fields.List(fields.Str(), allow_none=True, metadata={"description": "導出字段"})
+    export_fields = fields.List(fields.Str(), allow_none=True, metadata={"description": "導出字段"})
     created_by = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "創建者"})
 
 

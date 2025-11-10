@@ -19,9 +19,7 @@ from serializes.audit_serialize import (
     SecurityEventQuerySchema, SecurityEventInvestigateSchema, SecurityEventResolveSchema, SecurityEventAssignSchema,
     ComplianceReportQuerySchema, ComplianceReportGenerateSchema,
     AuditConfigQuerySchema, AuditConfigUpdateSchema, RetentionPolicyUpdateSchema,
-    AuditExportSchema, AuditLogResponseSchema, SecurityEventResponseSchema,
-    ComplianceReportResponseSchema, AuditConfigResponseSchema, RetentionPolicyResponseSchema,
-    AuditStatisticsResponseSchema, ExportTaskResponseSchema
+    AuditExportSchema
 )
 from common.common_tools import CommonTools
 from loggers import logger

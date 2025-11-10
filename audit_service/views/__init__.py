@@ -5,7 +5,3 @@
 @時間: 2025-01-09
 @作者: LiDong
 """
-
-from .search_api import blp
-
-__all__ = ['blp']
