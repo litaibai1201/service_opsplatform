@@ -38,5 +38,5 @@ SECRET_KEY = "abc"
 
 # 服务器配置
 SERVER_HOST = "0.0.0.0"
-SERVER_PORT = 25699  # 修改为项目服务的端口
+SERVER_PORT = 25707  # 修改为项目服务的端口
 WORKER_THREADS = 30

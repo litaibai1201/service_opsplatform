@@ -537,7 +537,7 @@ class ProjectController:
 
     # 活动记录
     @staticmethod
-    def _record_activity(project_id: str, user_id: str, activity_type: str, description: str, metadata: dict = None):
+    def _record_activity(project_id: str, user_id: str, activity_type: str, description: str, _metadata: dict = None):
         """记录项目活动"""
         try:
             activity = ProjectActivityModel(
@@ -545,7 +545,7 @@ class ProjectController:
                 user_id=user_id,
                 activity_type=activity_type,
                 description=description,
-                metadata=metadata
+                _metadata=_metadata
             )
             db.session.add(activity)
             db.session.commit()
@@ -567,7 +567,7 @@ class ProjectController:
                     'user_id': activity.user_id,
                     'activity_type': activity.activity_type,
                     'description': activity.description,
-                    'metadata': activity.metadata,
+                    '_metadata': activity._metadata,
                     'created_at': activity.created_at.isoformat() if activity.created_at else None
                 })
             

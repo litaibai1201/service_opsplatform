@@ -485,7 +485,7 @@ class OperTeamActivityModel:
             user_id=user_id,
             activity_type='team_created',
             description=f'創建了群組 "{team_name}"',
-            metadata={'team_name': team_name}
+            _metadata={'team_name': team_name}
         )
         return self.create_activity(activity)
     
@@ -496,7 +496,7 @@ class OperTeamActivityModel:
             user_id=user_id,
             activity_type='member_joined',
             description=f'新成員加入群組，角色為 {role}',
-            metadata={'new_member_id': new_member_id, 'role': role}
+            _metadata={'new_member_id': new_member_id, 'role': role}
         )
         return self.create_activity(activity)
     
@@ -507,7 +507,7 @@ class OperTeamActivityModel:
             user_id=user_id,
             activity_type='member_left',
             description='成員離開了群組',
-            metadata={'left_member_id': left_member_id}
+            _metadata={'left_member_id': left_member_id}
         )
         return self.create_activity(activity)
     
@@ -518,7 +518,7 @@ class OperTeamActivityModel:
             user_id=user_id,
             activity_type='role_changed',
             description=f'成員角色從 {old_role} 變更為 {new_role}',
-            metadata={
+            _metadata={
                 'target_member_id': target_member_id,
                 'old_role': old_role,
                 'new_role': new_role
@@ -533,7 +533,7 @@ class OperTeamActivityModel:
             user_id=user_id,
             activity_type='team_updated',
             description='群組信息已更新',
-            metadata={'changes': changes}
+            _metadata={'changes': changes}
         )
         return self.create_activity(activity)
     

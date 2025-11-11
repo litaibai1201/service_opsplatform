@@ -38,5 +38,5 @@ SECRET_KEY = "abc"
 
 # 服务器配置
 SERVER_HOST = "0.0.0.0"
-SERVER_PORT = 25700  # 修改为权限服务的端口
+SERVER_PORT = 25706  # 修改为权限服务的端口
 WORKER_THREADS = 30

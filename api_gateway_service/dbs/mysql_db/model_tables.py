@@ -151,7 +151,7 @@ class ApiCallLogModel(BaseModel):
 
     # 索引
     __table_args__ = (
-        db.Index('idx_path', 'path'),
+        db.Index('idx_path', db.text('path(255)')),
         db.Index('idx_status', 'response_status'),
         db.Index('idx_service', 'target_service'),
         db.Index('idx_user', 'user_id'),

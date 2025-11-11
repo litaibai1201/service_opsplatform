@@ -15,7 +15,7 @@ from common.common_method import fail_response_result, response_result
 from controllers.version_control_controller import version_control_controller
 from serializes.response_serialize import RspMsgDictSchema, RspMsgSchema
 from serializes.version_control_serialize import (
-    BranchCreateSchema, BranchUpdateSchema, BranchResponseSchema,
+    BranchQuerySchema, BranchCreateSchema, BranchUpdateSchema, BranchResponseSchema,
     CommitCreateSchema, CommitQuerySchema, CommitResponseSchema, CommitHistoryResponseSchema,
     MergeRequestCreateSchema, MergeRequestUpdateSchema, MergeRequestQuerySchema,
     MergeRequestResponseSchema, MergeRequestListResponseSchema,
@@ -57,7 +57,7 @@ class BranchManagementApi(BaseVersionControlView):
     """分支管理API"""
 
     @jwt_required()
-    @blp.arguments({"protected": {"type": "boolean"}}, location="query")
+    @blp.arguments(BranchQuerySchema, location="query")
     @blp.response(200, RspMsgDictSchema)
     def get(self, query_params, document_id):
         """獲取分支列表"""
@@ -249,6 +249,7 @@ class MergeRequestManagementApi(BaseVersionControlView):
         """創建合併請求"""
         try:
             result, flag = self.vc.create_merge_request(
+                document_id=document_id,
                 source_branch_id=payload['source_branch_id'],
                 target_branch_id=payload['target_branch_id'],
                 title=payload['title'],
@@ -355,6 +356,7 @@ class TagManagementApi(BaseVersionControlView):
         """創建標籤"""
         try:
             result, flag = self.vc.create_tag(
+                document_id=document_id,
                 tag_name=payload['tag_name'],
                 commit_id=payload['commit_id'],
                 tag_type=payload.get('tag_type', 'milestone'),

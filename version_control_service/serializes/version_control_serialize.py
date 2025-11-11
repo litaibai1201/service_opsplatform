@@ -10,6 +10,12 @@ from marshmallow import Schema, fields, validate, validates_schema, ValidationEr
 from marshmallow.validate import OneOf, Length, Range
 
 
+# ==================== 查询参数Schema ====================
+
+class BranchQuerySchema(Schema):
+    """分支查询参数Schema"""
+    protected = fields.Boolean(description="是否只显示受保护分支", missing=False)
+
 # ==================== 分支管理Schema ====================
 
 class BranchProtectionRulesSchema(Schema):

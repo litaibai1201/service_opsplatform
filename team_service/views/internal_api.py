@@ -12,7 +12,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, validate
 
 from controllers.team_controller import team_controller
-from common.common_method import success_response_result, fail_response_result
+from common.common_method import response_result, fail_response_result
 from loggers import logger
 
 # 创建蓝图
@@ -102,7 +102,7 @@ def get_user_teams_internal(data):
                 logger.error(f"获取用户 {user_id} 团队信息失败: {str(e)}")
                 result[user_id] = []
         
-        return success_response_result(data=result)
+        return response_result(content=result)
         
     except Exception as e:
         logger.error(f"批量获取用户团队信息失败: {str(e)}")
@@ -123,7 +123,7 @@ def get_user_role_internal(data):
         # 获取用户角色
         result = team_controller.get_user_role(team_id, user_id)
         
-        return success_response_result(data=result.get('data', {}))
+        return response_result(content=result.get('data', {}))
         
     except Exception as e:
         logger.error(f"获取用户角色失败: {str(e)}")
@@ -167,7 +167,7 @@ def get_team_members_internal(data):
                 logger.error(f"获取团队 {team_id} 成员信息失败: {str(e)}")
                 result[team_id] = []
         
-        return success_response_result(data=result)
+        return response_result(content=result)
         
     except Exception as e:
         logger.error(f"批量获取团队成员信息失败: {str(e)}")
@@ -197,7 +197,7 @@ def get_team_info_internal(team_id):
                 'created_at': team_data.get('created_at'),
                 'member_count': team_data.get('member_count', 0)
             }
-            return success_response_result(data=basic_info)
+            return response_result(content=basic_info)
         else:
             return fail_response_result(msg="团队不存在")
         
@@ -218,7 +218,7 @@ def get_user_teams_count_internal(user_id):
         
         if result.get('success'):
             teams_data = result.get('data', [])
-            return success_response_result(data={
+            return response_result(content={
                 'user_id': user_id,
                 'total_teams': len(teams_data),
                 'owner_teams': len([t for t in teams_data if t.get('role') == 'owner']),
@@ -226,7 +226,7 @@ def get_user_teams_count_internal(user_id):
                 'member_teams': len([t for t in teams_data if t.get('role') == 'member'])
             })
         else:
-            return success_response_result(data={
+            return response_result(content={
                 'user_id': user_id,
                 'total_teams': 0,
                 'owner_teams': 0,
@@ -250,7 +250,7 @@ def get_team_statistics_internal(team_id):
         result = team_controller.get_team_statistics(team_id, user_id="system")
         
         if result.get('success'):
-            return success_response_result(data=result.get('data', {}))
+            return response_result(content=result.get('data', {}))
         else:
             return fail_response_result(msg="团队不存在")
         
@@ -265,7 +265,7 @@ def health_check():
     内部API: 健康检查
     """
     try:
-        return success_response_result(data={
+        return response_result(content={
             'service': 'team_service',
             'status': 'healthy',
             'version': '1.0.0'
@@ -320,7 +320,7 @@ def handle_user_event_internal(data):
             return fail_response_result(msg="不支持的事件类型")
         
         if result.get('success'):
-            return success_response_result(msg="事件处理成功")
+            return response_result(msg="事件处理成功")
         else:
             return fail_response_result(msg=result.get('message', '事件处理失败'))
         

@@ -19,14 +19,14 @@ from dbs.mysql_db.model_tables import (
     TeamModel, TeamMemberModel, TeamJoinRequestModel,
     TeamInvitationModel, TeamActivityModel
 )
-from team_service.models.team_model import (
+from models.team_model import (
     OperTeamModel, OperTeamMemberModel, OperTeamJoinRequestModel,
     OperTeamInvitationModel, OperTeamActivityModel
 )
 from configs.constant import Config
 from loggers import logger
 from cache import redis_client
-from cache.token_cache import token_cache
+from cache.token_cache import team_cache
 
 
 class TeamController:

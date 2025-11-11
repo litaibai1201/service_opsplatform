@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional, Tuple
 
 from models.search_model import search_model, PlatformResource, SearchAnalytics
-from common.common_method import TryExcept
+from common.common_tools import TryExcept
 from cache import redis_client
 from loggers import logger
 

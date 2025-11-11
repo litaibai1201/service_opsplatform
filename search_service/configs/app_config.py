@@ -38,7 +38,7 @@ SECRET_KEY = "abc"
 
 # 服务器配置
 SERVER_HOST = "0.0.0.0"
-SERVER_PORT = 8091
+SERVER_PORT = 8095
 WORKER_THREADS = 30
 
 # Elasticsearch 配置

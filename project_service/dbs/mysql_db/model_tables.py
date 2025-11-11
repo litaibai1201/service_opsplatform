@@ -152,7 +152,7 @@ class ProjectActivityModel(BaseModel):
     user_id = db.Column(db.String(36), nullable=False, comment="用戶ID")
     activity_type = db.Column(db.String(100), nullable=False, comment="活動類型")
     description = db.Column(db.Text, nullable=False, comment="活動描述")
-    metadata = db.Column(db.JSON, comment="活動元數據")
+    _metadata = db.Column(db.JSON, comment="活動元數據")
 
     # 關係
     project = db.relationship('ProjectModel', backref='activities')
