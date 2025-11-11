@@ -25,7 +25,7 @@ class WebhookModel(db.Model, BaseMixinModel):
     """Webhook配置表模型"""
     __tablename__ = "webhooks"
     
-    id = db.Column(db.String(36), nullable=False, primary_key=True, default=generate_uuid, comment="主键ID")
+    id = db.Column(db.String(36), nullable=False, primary_key=True, default=BaseMixinModel.generate_uuid, comment="主键ID")
     project_id = db.Column(db.String(36), nullable=False, comment="项目ID")
     name = db.Column(db.String(255), nullable=False, comment="Webhook名称")
     url = db.Column(db.String(500), nullable=False, comment="回调URL")
@@ -73,7 +73,7 @@ class WebhookLogModel(db.Model, BaseMixinModel):
     """Webhook执行日志表模型"""
     __tablename__ = "webhook_logs"
     
-    id = db.Column(db.String(36), nullable=False, primary_key=True, default=generate_uuid, comment="主键ID")
+    id = db.Column(db.String(36), nullable=False, primary_key=True, default=BaseMixinModel.generate_uuid, comment="主键ID")
     webhook_id = db.Column(db.String(36), nullable=False, comment="Webhook ID")
     event_type = db.Column(db.String(100), nullable=False, comment="事件类型")
     payload = db.Column(JSON, nullable=False, comment="请求载荷")
@@ -118,7 +118,7 @@ class PluginModel(db.Model, BaseMixinModel):
     """插件管理表模型"""
     __tablename__ = "plugins"
     
-    id = db.Column(db.String(36), nullable=False, primary_key=True, default=generate_uuid, comment="主键ID")
+    id = db.Column(db.String(36), nullable=False, primary_key=True, default=BaseMixinModel.generate_uuid, comment="主键ID")
     name = db.Column(db.String(255), nullable=False, unique=True, comment="插件名称")
     version = db.Column(db.String(50), nullable=False, comment="版本号")
     description = db.Column(db.Text, nullable=True, comment="插件描述")
@@ -173,7 +173,7 @@ class PluginConfigurationModel(db.Model, BaseMixinModel):
     """插件配置表模型"""
     __tablename__ = "plugin_configurations"
     
-    id = db.Column(db.String(36), nullable=False, primary_key=True, default=generate_uuid, comment="主键ID")
+    id = db.Column(db.String(36), nullable=False, primary_key=True, default=BaseMixinModel.generate_uuid, comment="主键ID")
     plugin_id = db.Column(db.String(36), nullable=False, comment="插件ID")
     project_id = db.Column(db.String(36), nullable=True, comment="项目ID")
     configuration = db.Column(JSON, nullable=False, comment="配置信息")
@@ -210,7 +210,7 @@ class ExternalIntegrationModel(db.Model, BaseMixinModel):
     """外部集成配置表模型"""
     __tablename__ = "external_integrations"
     
-    id = db.Column(db.String(36), nullable=False, primary_key=True, default=generate_uuid, comment="主键ID")
+    id = db.Column(db.String(36), nullable=False, primary_key=True, default=BaseMixinModel.generate_uuid, comment="主键ID")
     project_id = db.Column(db.String(36), nullable=False, comment="项目ID")
     integration_type = db.Column(db.String(100), nullable=False, comment="集成类型")
     name = db.Column(db.String(255), nullable=False, comment="集成名称")
@@ -255,7 +255,7 @@ class IntegrationSyncLogModel(db.Model, BaseMixinModel):
     """集成同步日志表模型"""
     __tablename__ = "integration_sync_logs"
     
-    id = db.Column(db.String(36), nullable=False, primary_key=True, default=generate_uuid, comment="主键ID")
+    id = db.Column(db.String(36), nullable=False, primary_key=True, default=BaseMixinModel.generate_uuid, comment="主键ID")
     integration_id = db.Column(db.String(36), nullable=False, comment="集成ID")
     sync_type = db.Column(db.String(100), nullable=False, comment="同步类型")
     status = db.Column(db.Enum('success', 'failure', 'partial', name='sync_status'), 

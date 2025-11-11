@@ -20,7 +20,7 @@ from dbs.mysql_db.model_tables import (
     WebhookModel, WebhookLogModel, PluginModel, PluginConfigurationModel,
     ExternalIntegrationModel, IntegrationSyncLogModel
 )
-from common.common_method import TryExcept
+from common.common_tools import TryExcept
 from cache import redis_client
 from loggers import logger
 

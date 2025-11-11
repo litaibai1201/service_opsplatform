@@ -15,7 +15,7 @@ from flask_jwt_extended import JWTManager
 
 from cache import redis_client
 from common.common_method import fail_response_result
-from configs.app_config import REDIS_DATABASE_URI, SERVER_HOST, SERVER_PORT
+from configs.app_config import REDIS_DATABASE_URI, SERVER_HOST, SERVER_PORT, SQLALCHEMY_DATABASE_URI
 from dbs.mysql_db import db
 from controllers.notification_controller import init_notification_controller
 from loggers import logger
@@ -72,8 +72,7 @@ def create_app(app):
     ] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     
     # 数据库配置
-    from configs.db_config import DATABASE_URI
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+    app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "pool_pre_ping": True,

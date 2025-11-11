@@ -9,5 +9,6 @@
 
 db_account = {
     "mysql_db": {"username": "root", "password": "avary88!"},
+    "mongodb": {"username": "ai", "password": "avary88!"},
     "redis": {"password": ""}
 }

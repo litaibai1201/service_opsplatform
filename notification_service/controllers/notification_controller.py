@@ -25,10 +25,10 @@ from dbs.mysql_db.model_tables import (
     PushStatusEnum, DeviceTypeEnum
 )
 from models.notification_model import (
-    template_model, preference_model, notification_model,
-    email_queue_model, push_notification_model, user_device_model
+    oper_template_model, oper_preference_model, oper_notification_model,
+    oper_email_queue_model, oper_push_notification_model, oper_user_device_model
 )
-from common.common_method import TryExcept
+from common.common_tools import TryExcept
 from loggers import logger
 
 
@@ -40,12 +40,12 @@ class NotificationTemplateController:
                      is_active: bool = None, locale: str = None,
                      page: int = 1, size: int = 20) -> Tuple[Any, bool]:
         """获取通知模板列表"""
-        return template_model.get_templates(event_type, template_type, is_active, locale, page, size)
+        return oper_template_model.get_templates(event_type, template_type, is_active, locale, page, size)
     
     @TryExcept("获取通知模板详情失败")
     def get_template_by_id(self, template_id: str) -> Tuple[Any, bool]:
         """获取通知模板详情"""
-        return template_model.get_template_by_id(template_id)
+        return oper_template_model.get_template_by_id(template_id)
     
     @TryExcept("创建通知模板失败")
     def create_template(self, template_data: Dict) -> Tuple[Any, bool]:
@@ -63,17 +63,17 @@ class NotificationTemplateController:
             created_by=template_data['created_by']
         )
         
-        return template_model.create_template(template)
+        return oper_template_model.create_template(template)
     
     @TryExcept("更新通知模板失败")
     def update_template(self, template_id: str, update_data: Dict) -> Tuple[Any, bool]:
         """更新通知模板"""
-        return template_model.update_template(template_id, update_data)
+        return oper_template_model.update_template(template_id, update_data)
     
     @TryExcept("删除通知模板失败")
     def delete_template(self, template_id: str) -> Tuple[Any, bool]:
         """删除通知模板"""
-        return template_model.delete_template(template_id)
+        return oper_template_model.delete_template(template_id)
     
     @TryExcept("渲染模板失败")
     def render_template(self, template_data: Dict, variables: Dict) -> Tuple[Any, bool]:
@@ -108,23 +108,23 @@ class NotificationPreferenceController:
     @TryExcept("获取用户通知偏好失败")
     def get_user_preferences(self, user_id: str) -> Tuple[Any, bool]:
         """获取用户通知偏好"""
-        return preference_model.get_user_preferences(user_id)
+        return oper_preference_model.get_user_preferences(user_id)
     
     @TryExcept("更新用户通知偏好失败")
     def update_user_preferences(self, user_id: str, preferences_data: List[Dict]) -> Tuple[Any, bool]:
         """更新用户通知偏好"""
-        return preference_model.update_user_preferences(user_id, preferences_data)
+        return oper_preference_model.update_user_preferences(user_id, preferences_data)
     
     @TryExcept("重置用户通知偏好失败")
     def reset_user_preferences(self, user_id: str) -> Tuple[Any, bool]:
         """重置用户通知偏好"""
-        return preference_model.reset_user_preferences(user_id)
+        return oper_preference_model.reset_user_preferences(user_id)
     
     @TryExcept("检查用户通知偏好失败")
     def check_user_notification_enabled(self, user_id: str, event_type: str, 
                                        notification_type: str) -> Tuple[Any, bool]:
         """检查用户是否启用了特定类型的通知"""
-        preference_result, success = preference_model.get_user_event_preference(user_id, event_type)
+        preference_result, success = oper_preference_model.get_user_event_preference(user_id, event_type)
         
         if not success:
             return False, True  # 默认不发送
@@ -151,27 +151,27 @@ class NotificationController:
     def get_user_notifications(self, user_id: str, is_read: bool = None,
                               priority: str = None, page: int = 1, size: int = 20) -> Tuple[Any, bool]:
         """获取用户通知列表"""
-        return notification_model.get_user_notifications(user_id, is_read, priority, page, size)
+        return oper_notification_model.get_user_notifications(user_id, is_read, priority, page, size)
     
     @TryExcept("获取未读通知数量失败")
     def get_unread_count(self, user_id: str) -> Tuple[Any, bool]:
         """获取未读通知数量"""
-        return notification_model.get_unread_count(user_id)
+        return oper_notification_model.get_unread_count(user_id)
     
     @TryExcept("标记通知为已读失败")
     def mark_notification_read(self, notification_id: str, user_id: str) -> Tuple[Any, bool]:
         """标记通知为已读"""
-        return notification_model.mark_notification_read(notification_id, user_id)
+        return oper_notification_model.mark_notification_read(notification_id, user_id)
     
     @TryExcept("标记所有通知为已读失败")
     def mark_all_notifications_read(self, user_id: str) -> Tuple[Any, bool]:
         """标记所有通知为已读"""
-        return notification_model.mark_all_notifications_read(user_id)
+        return oper_notification_model.mark_all_notifications_read(user_id)
     
     @TryExcept("删除通知失败")
     def delete_notification(self, notification_id: str, user_id: str) -> Tuple[Any, bool]:
         """删除通知"""
-        return notification_model.delete_notification(notification_id, user_id)
+        return oper_notification_model.delete_notification(notification_id, user_id)
     
     @TryExcept("创建应用内通知失败")
     def create_in_app_notification(self, user_id: str, title: str, content: str,
@@ -203,7 +203,7 @@ class NotificationController:
             expires_at=expires_at
         )
         
-        return notification_model.create_notification(notification)
+        return oper_notification_model.create_notification(notification)
 
 
 class EmailController:
@@ -247,7 +247,7 @@ class EmailController:
             scheduled_at=scheduled_at or datetime.now()
         )
         
-        result, success = email_queue_model.add_email_to_queue(email)
+        result, success = oper_email_queue_model.add_email_to_queue(email)
         
         if success:
             # 启动邮件发送线程（在实际应用中应使用队列处理）
@@ -258,7 +258,7 @@ class EmailController:
     def _process_email_queue(self):
         """处理邮件队列（后台线程）"""
         try:
-            pending_emails, success = email_queue_model.get_pending_emails(limit=5)
+            pending_emails, success = oper_email_queue_model.get_pending_emails(limit=5)
             
             if success and pending_emails:
                 for email_data in pending_emails:
@@ -272,7 +272,7 @@ class EmailController:
         """发送单个邮件"""
         try:
             # 更新状态为处理中
-            email_queue_model.update_email_status(
+            oper_email_queue_model.update_email_status(
                 email_data['id'], 
                 EmailStatusEnum.PROCESSING
             )
@@ -305,7 +305,7 @@ class EmailController:
                     server.send_message(msg)
                 
                 # 更新状态为已发送
-                email_queue_model.update_email_status(
+                oper_email_queue_model.update_email_status(
                     email_data['id'], 
                     EmailStatusEnum.SENT
                 )
@@ -320,7 +320,7 @@ class EmailController:
             
             if retry_count < max_retries:
                 # 可以重试
-                email_queue_model.update_email_status(
+                oper_email_queue_model.update_email_status(
                     email_data['id'],
                     EmailStatusEnum.PENDING,
                     str(e),
@@ -329,7 +329,7 @@ class EmailController:
                 logger.warning(f"邮件发送失败，将重试: {email_data['id']}, 错误: {str(e)}")
             else:
                 # 超过最大重试次数
-                email_queue_model.update_email_status(
+                oper_email_queue_model.update_email_status(
                     email_data['id'],
                     EmailStatusEnum.FAILED,
                     str(e),
@@ -374,7 +374,7 @@ class PushNotificationController:
         """发送推送通知"""
         # 获取用户设备令牌
         if not device_tokens:
-            tokens_result, success = user_device_model.get_user_active_tokens(user_id)
+            tokens_result, success = oper_user_device_model.get_user_active_tokens(user_id)
             if not success or not tokens_result.get('tokens'):
                 return "用户没有可用的设备令牌", False
             device_tokens = tokens_result['tokens']
@@ -390,7 +390,7 @@ class PushNotificationController:
                 data=data or {}
             )
             
-            result, success = push_notification_model.create_push_notification(push)
+            result, success = oper_push_notification_model.create_push_notification(push)
             if success:
                 push_results.append(result)
         
@@ -402,7 +402,7 @@ class PushNotificationController:
     def _process_push_queue(self):
         """处理推送队列（后台线程）"""
         try:
-            pending_pushes, success = push_notification_model.get_pending_pushes(limit=10)
+            pending_pushes, success = oper_push_notification_model.get_pending_pushes(limit=10)
             
             if success and pending_pushes:
                 for push_data in pending_pushes:
@@ -422,13 +422,13 @@ class PushNotificationController:
                 self._send_fcm_push(push_data)
             else:
                 logger.warning("推送配置未设置，跳过发送")
-                push_notification_model.update_push_status(
+                oper_push_notification_model.update_push_status(
                     push_data['id'],
                     PushStatusEnum.SENT
                 )
                 
         except Exception as e:
-            push_notification_model.update_push_status(
+            oper_push_notification_model.update_push_status(
                 push_data['id'],
                 PushStatusEnum.FAILED,
                 str(e)
@@ -456,7 +456,7 @@ class PushNotificationController:
             response = requests.post(fcm_url, headers=headers, json=payload, timeout=10)
             
             if response.status_code == 200:
-                push_notification_model.update_push_status(
+                oper_push_notification_model.update_push_status(
                     push_data['id'],
                     PushStatusEnum.SENT
                 )
@@ -489,17 +489,17 @@ class UserDeviceController:
             device_name=device_name
         )
         
-        return user_device_model.register_device(device)
+        return oper_user_device_model.register_device(device)
     
     @TryExcept("获取用户设备列表失败")
     def get_user_devices(self, user_id: str, is_active: bool = None) -> Tuple[Any, bool]:
         """获取用户设备列表"""
-        return user_device_model.get_user_devices(user_id, is_active)
+        return oper_user_device_model.get_user_devices(user_id, is_active)
     
     @TryExcept("取消设备注册失败")
     def unregister_device(self, device_id: str, user_id: str) -> Tuple[Any, bool]:
         """取消设备注册"""
-        return user_device_model.unregister_device(device_id, user_id)
+        return oper_user_device_model.unregister_device(device_id, user_id)
 
 
 class NotificationEngine:
@@ -533,7 +533,7 @@ class NotificationEngine:
                 continue
             
             # 获取模板
-            template_result, success = template_model.get_template_by_event(
+            template_result, success = oper_template_model.get_template_by_event(
                 event_type, notification_type, locale
             )
             

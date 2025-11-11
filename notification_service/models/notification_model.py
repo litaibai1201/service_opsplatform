@@ -19,7 +19,7 @@ from dbs.mysql_db.model_tables import (
     NotificationPriorityEnum, EmailStatusEnum, EmailPriorityEnum,
     PushStatusEnum, DeviceTypeEnum
 )
-from common.common_method import TryExcept
+from common.common_tools import TryExcept
 from loggers import logger
 
 
@@ -578,9 +578,9 @@ class OperUserDeviceModel:
 
 
 # 全局模型实例
-template_model = OperNotificationTemplateModel()
-preference_model = OperUserNotificationPreferenceModel()
-notification_model = OperNotificationModel()
-email_queue_model = OperEmailQueueModel()
-push_notification_model = OperPushNotificationModel()
-user_device_model = OperUserDeviceModel()
+oper_template_model = OperNotificationTemplateModel()
+oper_preference_model = OperUserNotificationPreferenceModel()
+oper_notification_model = OperNotificationModel()
+oper_email_queue_model = OperEmailQueueModel()
+oper_push_notification_model = OperPushNotificationModel()
+oper_user_device_model = OperUserDeviceModel()

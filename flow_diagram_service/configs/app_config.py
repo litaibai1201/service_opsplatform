@@ -39,7 +39,7 @@ SECRET_KEY = "abc"
 
 # 服务器配置
 SERVER_HOST = "0.0.0.0"
-SERVER_PORT = 25702  # 流程图服务端口
+SERVER_PORT = 25705  # 流程图服务端口
 WORKER_THREADS = 30
 
 # 流程图相关配置

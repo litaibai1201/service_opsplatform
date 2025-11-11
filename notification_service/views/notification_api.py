@@ -518,24 +518,24 @@ class NotificationHealthApi(MethodView):
         # 检查通知服务状态
         try:
             # 获取邮件队列中待发送邮件数量
-            from models.notification_model import email_queue_model
-            pending_emails, success = email_queue_model.get_pending_emails(limit=1)
+            from models.notification_model import oper_email_queue_model
+            pending_emails, success = oper_email_queue_model.get_pending_emails(limit=1)
             if success:
                 health_data['email_queue_pending'] = len(pending_emails) if pending_emails else 0
             else:
                 health_data['email_queue_pending'] = 0
                 
             # 获取推送队列中待发送推送数量
-            from models.notification_model import push_notification_model
-            pending_pushes, success = push_notification_model.get_pending_pushes(limit=1)
+            from models.notification_model import oper_push_notification_model
+            pending_pushes, success = oper_push_notification_model.get_pending_pushes(limit=1)
             if success:
                 health_data['push_queue_pending'] = len(pending_pushes) if pending_pushes else 0
             else:
                 health_data['push_queue_pending'] = 0
                 
             # 获取活跃模板数量
-            from models.notification_model import template_model
-            templates_result, success = template_model.get_templates(is_active=True, page=1, size=1)
+            from models.notification_model import oper_template_model
+            templates_result, success = oper_template_model.get_templates(is_active=True, page=1, size=1)
             if success:
                 health_data['active_templates'] = templates_result.get('total', 0)
             else:

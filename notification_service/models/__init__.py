@@ -7,11 +7,11 @@
 """
 
 from .notification_model import (
-    template_model, preference_model, notification_model,
-    email_queue_model, push_notification_model, user_device_model
+    oper_template_model, oper_preference_model, oper_notification_model,
+    oper_email_queue_model, oper_push_notification_model, oper_user_device_model
 )
 
 __all__ = [
-    'template_model', 'preference_model', 'notification_model',
-    'email_queue_model', 'push_notification_model', 'user_device_model'
+    'oper_template_model', 'oper_preference_model', 'oper_notification_model',
+    'oper_email_queue_model', 'oper_push_notification_model', 'oper_user_device_model'
 ]
