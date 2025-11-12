@@ -13,6 +13,7 @@ export { default as ToastContainer, showToast } from './ToastContainer';
 export { default as Select } from './Select';
 export { default as Checkbox, CheckboxGroup } from './Checkbox';
 export { default as Radio, RadioGroup, RadioCard } from './Radio';
+export { default as Switch } from './Switch';
 export { default as Textarea, RichTextarea } from './Textarea';
 export { default as Badge } from './Badge';
 export { default as Avatar, AvatarGroup } from './Avatar';
