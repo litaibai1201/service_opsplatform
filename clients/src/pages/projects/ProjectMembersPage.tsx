@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/store';
 import { Card, Button, Input, Select, Badge, Avatar, Dropdown, Spinner } from '@/components/ui';
-import { useProjectMembers } from '@/hooks/data/useProjects';
+import { useProjectMaintainers } from '@/hooks/useProjectMaintainers';
+// useProjectMembers hook not found - using useProjectMaintainers for now
 import { usePermissions } from '@/components/layout/PermissionGuard';
 import {
   ArrowLeftIcon,
@@ -18,10 +19,12 @@ import {
   UserMinusIcon,
   Cog6ToothIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { ProjectMaintainer } from '@/types/entities';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 interface MemberQueryParams {
   page?: number;
   limit?: number;
@@ -250,10 +253,7 @@ const ProjectMembersPage: React.FC = () => {
                         <div className="flex items-center text-sm text-gray-500">
                           <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                           <span>
-                            加入于 {formatDistanceToNow(new Date(member.assignedAt), { 
-                              addSuffix: true, 
-                              locale: zhCN 
-                            })}
+                            加入于 {dayjs(member.assignedAt).fromNow()}
                           </span>
                         </div>
                         
@@ -261,10 +261,7 @@ const ProjectMembersPage: React.FC = () => {
                           <div className="flex items-center text-sm text-gray-500">
                             <UserIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                             <span>
-                              最后活动: {formatDistanceToNow(new Date(member.user.lastLoginAt), { 
-                                addSuffix: true, 
-                                locale: zhCN 
-                              })}
+                              最后活动: {dayjs(member.user.lastLoginAt).fromNow()}
                             </span>
                           </div>
                         )}

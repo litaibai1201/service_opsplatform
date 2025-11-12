@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Button, Input } from '@/components/ui';
-import { 
+import {
   PlayIcon,
   PauseIcon,
   StopIcon,
   ForwardIcon,
   BackwardIcon,
   ClockIcon,
-  VariableIcon,
-  ChartBarIcon,
+  CodeBracketIcon,
+  ChartBarSquareIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
@@ -150,7 +150,7 @@ const FlowSimulator: React.FC<FlowSimulatorProps> = ({
           </div>
         ) : (
           <div className="text-center py-4 text-gray-500 text-sm">
-            <VariableIcon className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+            <CodeBracketIcon className="w-8 h-8 mx-auto mb-2 text-gray-400" />
             <p>暂无变量</p>
             <p className="text-xs text-gray-400">添加变量来跟踪仿真状态</p>
           </div>
@@ -277,8 +277,8 @@ const FlowSimulator: React.FC<FlowSimulatorProps> = ({
   );
 
   const tabs = [
-    { id: 'variables', label: '变量', icon: VariableIcon },
-    { id: 'execution', label: '执行', icon: ChartBarIcon },
+    { id: 'variables', label: '变量', icon: CodeBracketIcon },
+    { id: 'execution', label: '执行', icon: ChartBarSquareIcon },
     { id: 'breakpoints', label: '断点', icon: StopIcon }
   ];
 

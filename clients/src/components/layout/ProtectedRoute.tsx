@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { 
     isAuthenticated, 
     user, 
-    loading: authLoading 
+    isLoading: authLoading 
   } = useAppSelector(state => state.auth);
 
   // 如果正在加载认证状态，显示加载屏幕

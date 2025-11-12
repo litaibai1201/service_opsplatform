@@ -10,9 +10,11 @@ import {
   FolderIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 export interface Activity {
   id: string;
   type: 'project_created' | 'design_created' | 'design_updated' | 'member_joined' | 'comment_added' | 'team_created';
@@ -174,10 +176,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                       
                       <div className="mt-2 flex items-center space-x-3">
                         <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(activity.timestamp), {
-                            addSuffix: true,
-                            locale: zhCN,
-                          })}
+                          {dayjs(activity.timestamp).fromNow()}
                         </span>
                         
                         {activity.metadata?.tags && (

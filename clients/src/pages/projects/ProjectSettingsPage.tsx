@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/store';
 import { Card, Button, Input, Textarea, Select, Switch, Badge } from '@/components/ui';
-import { useProjectDetail, useProjectSettings } from '@/hooks/data/useProjects';
+import { useProjectDetail } from '@/hooks/useProjectDetail';
+// useProjectSettings hook not found - using useProjectDetail for now
 import { RequireProjectManage } from '@/components/layout/PermissionGuard';
 import { 
   ArrowLeftIcon,

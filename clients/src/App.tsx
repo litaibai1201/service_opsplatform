@@ -26,8 +26,8 @@ import DatabaseDesignPage from '@/pages/design-tools/database-design/DatabaseDes
 import FeatureMapPage from '@/pages/design-tools/feature-map/FeatureMapPage';
 
 // 路由守卫组件
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import PublicRoute from '@/components/auth/PublicRoute';
+import ProtectedRoute from '@/components/layout/ProtectedRoute';
+import PublicRoute from '@/components/layout/PublicRoute';
 
 // 工具组件
 import LoadingScreen from '@/components/ui/LoadingScreen';
@@ -59,40 +59,109 @@ function App() {
       <div className="App">
         <Routes>
           {/* 公开路由 - 仅在未登录时可访问 */}
-          <Route element={<PublicRoute />}>
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            </Route>
-          </Route>
+          <Route path="/login" element={
+            <PublicRoute>
+              <AuthLayout>
+                <LoginPage />
+              </AuthLayout>
+            </PublicRoute>
+          } />
+          <Route path="/register" element={
+            <PublicRoute>
+              <AuthLayout>
+                <RegisterPage />
+              </AuthLayout>
+            </PublicRoute>
+          } />
+          <Route path="/forgot-password" element={
+            <PublicRoute>
+              <AuthLayout>
+                <ForgotPasswordPage />
+              </AuthLayout>
+            </PublicRoute>
+          } />
 
           {/* 受保护的路由 - 需要登录 */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
-              {/* 仪表板 */}
-              <Route path="/dashboard" element={<DashboardPage />} />
-              
-              {/* 团队管理 */}
-              <Route path="/teams" element={<TeamsPage />} />
-              <Route path="/teams/:teamId" element={<TeamDetailPage />} />
-              
-              {/* 项目管理 */}
-              <Route path="/projects" element={<ProjectsPage />} />
-              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-              
-              {/* 设计工具 */}
-              <Route path="/projects/:projectId/architecture" element={<ArchitecturePage />} />
-              <Route path="/projects/:projectId/flow-diagram" element={<FlowDiagramPage />} />
-              <Route path="/projects/:projectId/api-design" element={<ApiDesignPage />} />
-              <Route path="/projects/:projectId/database-design" element={<DatabaseDesignPage />} />
-              <Route path="/projects/:projectId/feature-map" element={<FeatureMapPage />} />
-              
-              {/* 默认重定向到仪表板 */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            </Route>
-          </Route>
-
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <DashboardPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          
+          {/* 团队管理 */}
+          <Route path="/teams" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <TeamsPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/teams/:teamId" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <TeamDetailPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          
+          {/* 项目管理 */}
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ProjectsPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/projects/:projectId" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ProjectDetailPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          
+          {/* 设计工具 */}
+          <Route path="/projects/:projectId/architecture" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ArchitecturePage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/projects/:projectId/flow-diagram" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <FlowDiagramPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/projects/:projectId/api-design" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ApiDesignPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/projects/:projectId/database-design" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <DatabaseDesignPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/projects/:projectId/feature-map" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <FeatureMapPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          
+          {/* 默认重定向 */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          
           {/* 404 页面 */}
           <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
         </Routes>

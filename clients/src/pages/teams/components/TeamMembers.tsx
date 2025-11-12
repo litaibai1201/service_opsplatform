@@ -16,10 +16,12 @@ import {
   UserMinusIcon,
   Cog6ToothIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { TeamMember } from '@/types/entities';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 interface TeamMembersProps {
   teamId: string;
 }
@@ -255,10 +257,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ teamId }) => {
                         <div className="flex items-center text-sm text-gray-500">
                           <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                           <span>
-                            加入于 {formatDistanceToNow(new Date(member.joinedAt), { 
-                              addSuffix: true, 
-                              locale: zhCN 
-                            })}
+                            加入于 {dayjs(member.joinedAt).fromNow()}
                           </span>
                         </div>
                       </div>
@@ -325,10 +324,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ teamId }) => {
                 <div className="mt-3 ml-16 flex items-center space-x-6 text-xs text-gray-500">
                   <span>最后活动: {
                     member.lastActiveAt 
-                      ? formatDistanceToNow(new Date(member.lastActiveAt), { 
-                          addSuffix: true, 
-                          locale: zhCN 
-                        })
+                      ? dayjs(member.lastActiveAt).fromNow()
                       : '从未活动'
                   }</span>
                   {member.projectCount !== undefined && (

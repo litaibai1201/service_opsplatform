@@ -14,8 +14,12 @@ import {
   ClockIcon,
   ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/zh-cn';
+
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 import { Project } from '@/types/entities';
 
 interface ProjectCardProps {
@@ -269,19 +273,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex items-center space-x-1">
           <CalendarIcon className="h-4 w-4" />
           <span>
-            创建于 {formatDistanceToNow(new Date(project.createdAt), { 
-              addSuffix: true, 
-              locale: zhCN 
-            })}
+            创建于 {dayjs(project.createdAt).fromNow()}
           </span>
         </div>
         
         {project.lastActivityAt && (
           <span>
-            最后活动: {formatDistanceToNow(new Date(project.lastActivityAt), { 
-              addSuffix: true, 
-              locale: zhCN 
-            })}
+            最后活动: {dayjs(project.lastActivityAt).fromNow()}
           </span>
         )}
       </div>

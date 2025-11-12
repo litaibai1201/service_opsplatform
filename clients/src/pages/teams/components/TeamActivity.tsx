@@ -17,10 +17,12 @@ import {
   ShieldCheckIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { TeamActivity as ActivityType } from '@/types/entities';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 interface TeamActivityProps {
   teamId: string;
 }
@@ -296,10 +298,7 @@ const TeamActivity: React.FC<TeamActivityProps> = ({ teamId }) => {
                           
                           <div className="flex items-center space-x-2 text-xs text-gray-500">
                             <span>
-                              {formatDistanceToNow(new Date(activity.createdAt), { 
-                                addSuffix: true, 
-                                locale: zhCN 
-                              })}
+                              {dayjs(activity.createdAt).fromNow()}
                             </span>
                             
                             {activity.metadata?.location && (

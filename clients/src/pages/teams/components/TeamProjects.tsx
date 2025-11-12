@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Input, Select, Badge, Dropdown, Spinner } from '@/components/ui';
-import { useTeamProjects } from '@/hooks/data/useProjects';
+import { useTeamProjects } from '@/hooks/data';
 import { usePermissions } from '@/components/layout/PermissionGuard';
 import {
   MagnifyingGlassIcon,
@@ -19,10 +19,12 @@ import {
   RocketLaunchIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { Project } from '@/types/entities';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 interface TeamProjectsProps {
   teamId: string;
 }
@@ -271,10 +273,7 @@ const TeamProjects: React.FC<TeamProjectsProps> = ({ teamId }) => {
                         <div className="flex items-center space-x-1">
                           <CalendarIcon className="h-4 w-4" />
                           <span>
-                            创建于 {formatDistanceToNow(new Date(project.createdAt), { 
-                              addSuffix: true, 
-                              locale: zhCN 
-                            })}
+                            创建于 {dayjs(project.createdAt).fromNow()}
                           </span>
                         </div>
                         
@@ -282,10 +281,7 @@ const TeamProjects: React.FC<TeamProjectsProps> = ({ teamId }) => {
                           <div className="flex items-center space-x-1">
                             <ClockIcon className="h-4 w-4" />
                             <span>
-                              截止 {formatDistanceToNow(new Date(project.dueDate), { 
-                                addSuffix: true, 
-                                locale: zhCN 
-                              })}
+                              截止 {dayjs(project.dueDate).fromNow()}
                             </span>
                           </div>
                         )}
@@ -317,10 +313,7 @@ const TeamProjects: React.FC<TeamProjectsProps> = ({ teamId }) => {
                       {/* 最近活动 */}
                       {project.lastActivityAt && (
                         <div className="text-xs text-gray-500">
-                          最后活动: {formatDistanceToNow(new Date(project.lastActivityAt), { 
-                            addSuffix: true, 
-                            locale: zhCN 
-                          })}
+                          最后活动: {dayjs(project.lastActivityAt).fromNow()}
                         </div>
                       )}
                     </div>

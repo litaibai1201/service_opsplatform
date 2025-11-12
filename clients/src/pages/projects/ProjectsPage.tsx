@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/store';
 import { Card, Button, Input, Select, Badge, Spinner } from '@/components/ui';
-import { useProjects } from '@/hooks/data/useProjects';
+import { useProjects } from '@/hooks/useProjects';
 import ProjectCard from './components/ProjectCard';
 import CreateProjectModal from './components/CreateProjectModal';
 import { 

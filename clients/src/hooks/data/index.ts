@@ -1,8 +1,8 @@
 // 数据Hook导出
 export { default as useDashboard, useDashboardStats, useDashboardActivities, useDashboardProjects } from './useDashboard';
+export { useProjects, useProjectStats, usePublicProjects } from '../useProjects';
 export { 
   default as useTeams,
-  useTeams,
   useTeamDetail,
   useTeamSettings,
   useTeamMembers,

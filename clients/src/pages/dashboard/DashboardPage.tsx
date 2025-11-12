@@ -6,12 +6,12 @@ import ActivityFeed from './components/ActivityFeed';
 import QuickActions from './components/QuickActions';
 import RecentProjects from './components/RecentProjects';
 import { useDashboard } from '@/hooks/data/useDashboard';
-import { 
-  PlusIcon, 
-  ChartBarIcon, 
+import {
+  PlusIcon,
+  ChartBarSquareIcon,
   UserGroupIcon,
   FolderIcon,
-  BellIcon 
+  BellIcon
 } from '@heroicons/react/24/outline';
 
 const DashboardPage: React.FC = () => {
@@ -158,7 +158,7 @@ const DashboardPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <ChartBarIcon className="h-4 w-4 text-gray-400" />
+                    <ChartBarSquareIcon className="h-4 w-4 text-gray-400" />
                     <span className="text-sm text-gray-600">创建设计图</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">15</span>

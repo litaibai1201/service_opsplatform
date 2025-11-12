@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Input, Select, Avatar } from '@/components/ui';
-import { useProjectMaintainers } from '@/hooks/data/useProjects';
+import { useProjectMaintainers } from '@/hooks/useProjectMaintainers';
 import { useTeamMembers } from '@/hooks/data/useTeams';
 import {
   UserPlusIcon,

@@ -11,8 +11,12 @@ import {
   EyeIcon,
   ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/zh-cn';
+
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 import { Team, TeamMember } from '@/types/entities';
 
 interface TeamCardProps {
@@ -216,10 +220,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
         {/* 最后活动时间 */}
         <span className="text-xs text-gray-500">
           {team.lastActivityAt 
-            ? formatDistanceToNow(new Date(team.lastActivityAt), { 
-                addSuffix: true, 
-                locale: zhCN 
-              })
+            ? dayjs(team.lastActivityAt).fromNow()
             : '暂无活动'
           }
         </span>

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Card } from '@/components/ui';
-import { 
-  UserGroupIcon, 
-  FolderIcon, 
+import {
+  UserGroupIcon,
+  FolderIcon,
   PresentationChartBarIcon,
   ClockIcon,
-  TrendingUpIcon,
-  TrendingDownIcon
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline';
 
 export interface DashboardStats {
@@ -47,9 +47,9 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
 
   const formatGrowth = (value: number) => {
     const isPositive = value >= 0;
-    const Icon = isPositive ? TrendingUpIcon : TrendingDownIcon;
+    const Icon = isPositive ? ArrowTrendingUpIcon : ArrowTrendingDownIcon;
     const color = isPositive ? 'text-green-600' : 'text-red-600';
-    
+
     return (
       <div className={`flex items-center space-x-1 ${color}`}>
         <Icon className="h-3 w-3" />

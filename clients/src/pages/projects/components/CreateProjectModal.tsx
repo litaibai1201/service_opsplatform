@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Input, Textarea, Select, Switch } from '@/components/ui';
-import { useProjects } from '@/hooks/data/useProjects';
+import { useProjects } from '@/hooks/useProjects';
 import { useTeams } from '@/hooks/data/useTeams';
 import {
   FolderIcon,

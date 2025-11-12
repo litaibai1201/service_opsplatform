@@ -1,4 +1,13 @@
 // 用户相关类型
+export enum UserRole {
+  EXTERNAL_USER = 'external_user',
+  TEAM_MEMBER = 'team_member',
+  PROJECT_MAINTAINER = 'project_maintainer',
+  TEAM_ADMIN = 'team_admin',
+  TEAM_OWNER = 'team_owner',
+  PLATFORM_ADMIN = 'platform_admin',
+}
+
 export interface User {
   id: string;
   username: string;
@@ -7,6 +16,8 @@ export interface User {
   avatarUrl?: string;
   status: 'active' | 'inactive' | 'suspended' | 'pending_verification';
   platformRole: 'platform_admin' | 'platform_user';
+  role: UserRole;
+  permissions?: string[];
   emailVerified: boolean;
   twoFactorEnabled: boolean;
   timezone: string;
@@ -14,6 +25,14 @@ export interface User {
   lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;
+  teamMemberships?: Array<{
+    teamId: string;
+    role: UserRole;
+  }>;
+  projectMaintainerships?: Array<{
+    projectId: string;
+    canManage: boolean;
+  }>;
 }
 
 // 团队相关类型

@@ -8,9 +8,11 @@ import {
   EyeIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 export interface RecentProject {
   id: string;
   name: string;
@@ -145,10 +147,7 @@ const RecentProjects: React.FC<RecentProjectsProps> = ({ projects }) => {
                   <div className="flex items-center space-x-1">
                     <CalendarIcon className="h-3 w-3" />
                     <span>
-                      {formatDistanceToNow(new Date(project.lastActivity), {
-                        addSuffix: true,
-                        locale: zhCN,
-                      })}
+                      {dayjs(project.lastActivity).fromNow()}
                     </span>
                   </div>
                   

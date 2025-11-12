@@ -1,34 +1,21 @@
-import React, { useState } from 'react';
-import { 
-  ChevronUpIcon, 
-  ChevronDownIcon,
-  ChevronUpDownIcon,
-  MagnifyingGlassIcon 
-} from '@heroicons/react/24/outline';
-import { cn } from '@/utils/helpers';
-import Checkbox from './Checkbox';
-import Badge from './Badge';
-import Spinner from './Spinner';
+import React, { useState, useMemo } from 'react';
+import { clsx } from 'clsx';
+import { ChevronUpIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 
-export interface Column<T = any> {
+export interface TableColumn<T> {
   key: string;
-  title: string;
+  title: React.ReactNode;
   dataIndex?: string;
   render?: (value: any, record: T, index: number) => React.ReactNode;
-  sorter?: boolean | ((a: T, b: T) => number);
-  sortOrder?: 'asc' | 'desc' | null;
-  width?: string | number;
-  fixed?: 'left' | 'right';
+  width?: number | string;
   align?: 'left' | 'center' | 'right';
-  ellipsis?: boolean;
-  searchable?: boolean;
-  filterable?: boolean;
-  filters?: Array<{ text: string; value: any }>;
+  sortable?: boolean;
+  fixed?: 'left' | 'right';
   className?: string;
 }
 
-interface TableProps<T = any> {
-  columns: Column<T>[];
+export interface TableProps<T = any> {
+  columns: TableColumn<T>[];
   data: T[];
   loading?: boolean;
   rowKey?: string | ((record: T) => string);
@@ -39,51 +26,52 @@ interface TableProps<T = any> {
   sticky?: boolean;
   selectable?: boolean;
   selectedKeys?: string[];
-  onSelectionChange?: (keys: string[]) => void;
+  onSelectionChange?: (selectedKeys: string[], selectedRows: T[]) => void;
   onRowClick?: (record: T, index: number) => void;
-  pagination?: boolean | {
+  pagination?: {
     current: number;
     pageSize: number;
     total: number;
-    onChange: (page: number, pageSize: number) => void;
+    showSizeChanger?: boolean;
+    onChange: (page: number, pageSize?: number) => void;
   };
   expandable?: {
-    expandedRowRender: (record: T, index: number) => React.ReactNode;
-    expandedRowKeys?: string[];
-    onExpandedRowsChange?: (keys: string[]) => void;
+    expandedRowRender: (record: T) => React.ReactNode;
+    rowExpandable?: (record: T) => boolean;
   };
   className?: string;
   emptyText?: React.ReactNode;
 }
 
-const Table = <T extends Record<string, any>>({
-  columns,
-  data,
-  loading = false,
-  rowKey = 'id',
-  size = 'md',
-  bordered = false,
-  striped = false,
-  hoverable = true,
-  sticky = false,
-  selectable = false,
-  selectedKeys = [],
-  onSelectionChange,
-  onRowClick,
-  pagination,
-  expandable,
-  className,
-  emptyText = '暂无数据',
-}: TableProps<T>) => {
+const Table = <T extends Record<string, any>>(props: TableProps<T>) => {
+  const {
+    columns,
+    data,
+    loading = false,
+    rowKey = 'id',
+    size = 'md',
+    bordered = false,
+    striped = false,
+    hoverable = true,
+    sticky = false,
+    selectable = false,
+    selectedKeys = [],
+    onSelectionChange,
+    onRowClick,
+    pagination,
+    expandable,
+    className,
+    emptyText = '暂无数据',
+  } = props;
+
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: 'asc' | 'desc';
   } | null>(null);
-  const [searchText, setSearchText] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
-  // 获取行的key
-  const getRowKey = (record: T, index: number): string => {
+  // 获取行的 key
+  const getRowKey = (record: T, index: number) => {
     if (typeof rowKey === 'function') {
       return rowKey(record);
     }
@@ -91,85 +79,80 @@ const Table = <T extends Record<string, any>>({
   };
 
   // 排序处理
-  const handleSort = (column: Column<T>) => {
-    if (!column.sorter) return;
-
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig?.key === column.key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-
-    setSortConfig({ key: column.key, direction });
+  const handleSort = (column: TableColumn<T>) => {
+    if (!column.sortable) return;
+    
+    const newDirection = 
+      sortConfig?.key === column.key && sortConfig?.direction === 'asc'
+        ? 'desc'
+        : 'asc';
+    
+    setSortConfig({
+      key: column.key,
+      direction: newDirection,
+    });
   };
 
-  // 数据处理（排序、搜索、筛选）
-  const processedData = React.useMemo(() => {
-    let result = [...data];
-
-    // 搜索
-    if (searchText) {
-      result = result.filter(record =>
-        Object.values(record).some(value =>
-          String(value).toLowerCase().includes(searchText.toLowerCase())
-        )
-      );
-    }
-
-    // 排序
-    if (sortConfig) {
-      const column = columns.find(col => col.key === sortConfig.key);
-      if (column?.sorter) {
-        result.sort((a, b) => {
-          if (typeof column.sorter === 'function') {
-            const compareResult = column.sorter(a, b);
-            return sortConfig.direction === 'desc' ? -compareResult : compareResult;
-          } else {
-            const aVal = column.dataIndex ? a[column.dataIndex] : a[column.key];
-            const bVal = column.dataIndex ? b[column.dataIndex] : b[column.key];
-            
-            if (aVal < bVal) return sortConfig.direction === 'desc' ? 1 : -1;
-            if (aVal > bVal) return sortConfig.direction === 'desc' ? -1 : 1;
-            return 0;
-          }
-        });
+  // 排序后的数据
+  const sortedData = useMemo(() => {
+    if (!sortConfig) return data;
+    
+    return [...data].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
       }
-    }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [data, sortConfig]);
 
-    return result;
-  }, [data, sortConfig, searchText, columns]);
+  // 展开功能
+  const isRowExpanded = (record: T) => {
+    const key = getRowKey(record, 0);
+    return expandedKeys.includes(key);
+  };
 
-  // 选择处理
+  // 全选处理
   const handleSelectAll = (checked: boolean) => {
     if (!onSelectionChange) return;
-
+    
     if (checked) {
-      const allKeys = processedData.map((record, index) => getRowKey(record, index));
-      onSelectionChange(allKeys);
+      const allKeys = sortedData.map((record, index) => getRowKey(record, index));
+      onSelectionChange(allKeys, sortedData);
     } else {
-      onSelectionChange([]);
+      onSelectionChange([], []);
     }
   };
 
-  const handleSelectRow = (key: string, checked: boolean) => {
+  // 单行选择处理
+  const handleSelectRow = (record: T, index: number, checked: boolean) => {
     if (!onSelectionChange) return;
-
+    
+    const key = getRowKey(record, index);
+    
     if (checked) {
-      onSelectionChange([...selectedKeys, key]);
+      onSelectionChange([...selectedKeys, key], [...sortedData.filter((r, i) => selectedKeys.includes(getRowKey(r, i))), record]);
     } else {
-      onSelectionChange(selectedKeys.filter(k => k !== key));
+      onSelectionChange(selectedKeys.filter(k => k !== key), sortedData.filter((r, i) => selectedKeys.includes(getRowKey(r, i)) && getRowKey(r, i) !== key));
     }
   };
 
   // 展开处理
-  const handleExpand = (key: string) => {
-    const newExpandedKeys = expandedKeys.includes(key)
-      ? expandedKeys.filter(k => k !== key)
-      : [...expandedKeys, key];
-    
-    setExpandedKeys(newExpandedKeys);
-    expandable?.onExpandedRowsChange?.(newExpandedKeys);
+  const handleExpand = (record: T, index: number) => {
+    const key = getRowKey(record, index);
+    if (expandedKeys.includes(key)) {
+      setExpandedKeys(expandedKeys.filter(k => k !== key));
+    } else {
+      setExpandedKeys([...expandedKeys, key]);
+    }
   };
 
+  // 样式类
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
@@ -177,89 +160,270 @@ const Table = <T extends Record<string, any>>({
   };
 
   const cellPaddingClasses = {
-    sm: 'px-3 py-2',
+    sm: 'px-2 py-1',
     md: 'px-4 py-3',
     lg: 'px-6 py-4',
   };
 
-  const isAllSelected = processedData.length > 0 && 
-    processedData.every((record, index) => 
-      selectedKeys.includes(getRowKey(record, index))
-    );
-  const isIndeterminate = selectedKeys.length > 0 && !isAllSelected;
+  // 全选状态
+  const isAllSelected = selectedKeys.length > 0 && selectedKeys.length === sortedData.length;
+  const isIndeterminate = selectedKeys.length > 0 && selectedKeys.length < sortedData.length;
 
   return (
-    <div className={cn('overflow-hidden', className)}>
-      {/* 搜索栏 */}
-      {columns.some(col => col.searchable) && (
-        <div className="mb-4">
-          <div className="relative max-w-sm">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="搜索..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-        </div>
-      )}
-
-      <div className={cn(
-        'overflow-x-auto',
-        sticky && 'max-h-96 overflow-y-auto'
-      )}>
-        <table className={cn(
-          'min-w-full divide-y divide-gray-200',
-          sizeClasses[size]
-        )}>
-          <thead className={cn(
-            'bg-gray-50',
-            sticky && 'sticky top-0 z-10'
+    <div className={clsx(
+      'w-full overflow-hidden',
+      {
+        'border border-gray-300 dark:border-gray-600 rounded-lg': bordered,
+      },
+      className
+    )}>
+      {/* 表格容器 */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          {/* 表头 */}
+          <thead className={clsx(
+            'bg-gray-50 dark:bg-gray-800',
+            {
+              'sticky top-0 z-10': sticky,
+            }
           )}>
             <tr>
+              {/* 选择列 */}
               {selectable && (
-                <th className={cn(
-                  'w-12 text-center',
+                <th className={clsx(
+                  'w-12',
                   cellPaddingClasses[size],
-                  bordered && 'border border-gray-200'
+                  'text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
                 )}>
-                  <Checkbox
+                  <input
+                    type="checkbox"
                     checked={isAllSelected}
-                    indeterminate={isIndeterminate}
-                    onChange={handleSelectAll}
-                    size="sm"
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                 </th>
               )}
+              
+              {/* 展开列 */}
+              {expandable && (
+                <th className={clsx(
+                  'w-12',
+                  cellPaddingClasses[size],
+                  'text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+                )}>
+                  {/* 空列 */}
+                </th>
+              )}
 
+              {/* 数据列 */}
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={cn(
-                    'text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+                  className={clsx(
                     cellPaddingClasses[size],
+                    'text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
                     {
+                      'text-left': column.align === 'left' || !column.align,
                       'text-center': column.align === 'center',
                       'text-right': column.align === 'right',
-                      'cursor-pointer hover:bg-gray-100': column.sorter,
-                      'border border-gray-200': bordered,
+                      'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700': column.sortable,
+                      'sticky left-0 bg-gray-50 dark:bg-gray-800': column.fixed === 'left',
+                      'sticky right-0 bg-gray-50 dark:bg-gray-800': column.fixed === 'right',
                     },
                     column.className
                   )}
                   style={{ width: column.width }}
-                  onClick={() => handleSort(column)}
+                  onClick={() => column.sortable && handleSort(column)}
                 >
                   <div className="flex items-center space-x-1">
-                    <span className={cn({ 'truncate': column.ellipsis })}>
-                      {column.title}
-                    </span>
-                    {column.sorter && (
-                      <span className="ml-1">
+                    <span>{column.title}</span>
+                    {column.sortable && (
+                      <span className="flex-shrink-0">
                         {sortConfig?.key === column.key ? (
                           sortConfig.direction === 'asc' ? (
                             <ChevronUpIcon className="h-4 w-4" />
                           ) : (
                             <ChevronDownIcon className="h-4 w-4" />
-                          )\n                        ) : (\n                          <ChevronUpDownIcon className=\"h-4 w-4 text-gray-400\" />\n                        )}\n                      </span>\n                    )}\n                  </div>\n                </th>\n              ))}\n            </tr>\n          </thead>\n\n          <tbody className=\"bg-white divide-y divide-gray-200\">\n            {loading ? (\n              <tr>\n                <td\n                  colSpan={columns.length + (selectable ? 1 : 0)}\n                  className=\"text-center py-12\"\n                >\n                  <Spinner size=\"lg\" label=\"加载中...\" />\n                </td>\n              </tr>\n            ) : processedData.length === 0 ? (\n              <tr>\n                <td\n                  colSpan={columns.length + (selectable ? 1 : 0)}\n                  className=\"text-center py-12 text-gray-500\"\n                >\n                  {emptyText}\n                </td>\n              </tr>\n            ) : (\n              processedData.map((record, index) => {\n                const key = getRowKey(record, index);\n                const isSelected = selectedKeys.includes(key);\n                const isExpanded = expandedKeys.includes(key);\n\n                return (\n                  <React.Fragment key={key}>\n                    <tr\n                      className={cn(\n                        {\n                          'bg-gray-50': striped && index % 2 === 1,\n                          'hover:bg-gray-50': hoverable && !isSelected,\n                          'bg-primary-50': isSelected,\n                          'cursor-pointer': onRowClick,\n                        }\n                      )}\n                      onClick={() => onRowClick?.(record, index)}\n                    >\n                      {selectable && (\n                        <td className={cn(\n                          'text-center',\n                          cellPaddingClasses[size],\n                          bordered && 'border border-gray-200'\n                        )}>\n                          <Checkbox\n                            checked={isSelected}\n                            onChange={(checked) => handleSelectRow(key, checked)}\n                            size=\"sm\"\n                          />\n                        </td>\n                      )}\n\n                      {columns.map((column) => {\n                        const value = column.dataIndex ? record[column.dataIndex] : record[column.key];\n                        const cellContent = column.render\n                          ? column.render(value, record, index)\n                          : value;\n\n                        return (\n                          <td\n                            key={column.key}\n                            className={cn(\n                              'text-gray-900',\n                              cellPaddingClasses[size],\n                              {\n                                'text-center': column.align === 'center',\n                                'text-right': column.align === 'right',\n                                'border border-gray-200': bordered,\n                              }\n                            )}\n                          >\n                            <div className={cn({\n                              'truncate': column.ellipsis,\n                            })}>\n                              {cellContent}\n                            </div>\n                          </td>\n                        );\n                      })}\n                    </tr>\n\n                    {/* 展开行 */}\n                    {expandable && isExpanded && (\n                      <tr>\n                        <td\n                          colSpan={columns.length + (selectable ? 1 : 0)}\n                          className={cn(\n                            'bg-gray-50',\n                            cellPaddingClasses[size],\n                            bordered && 'border border-gray-200'\n                          )}\n                        >\n                          {expandable.expandedRowRender(record, index)}\n                        </td>\n                      </tr>\n                    )}\n                  </React.Fragment>\n                );\n              })\n            )}\n          </tbody>\n        </table>\n      </div>\n    </div>\n  );\n};\n\nexport default Table;"
+                          )
+                        ) : (
+                          <div className="h-4 w-4" />
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          {/* 表体 */}
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            {loading ? (
+              <tr>
+                <td 
+                  colSpan={columns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)}
+                  className={clsx(cellPaddingClasses[size], 'text-center text-gray-500 dark:text-gray-400')}
+                >
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                    <span className="ml-2">加载中...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : sortedData.length === 0 ? (
+              <tr>
+                <td 
+                  colSpan={columns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)}
+                  className={clsx(cellPaddingClasses[size], 'text-center text-gray-500 dark:text-gray-400')}
+                >
+                  {emptyText}
+                </td>
+              </tr>
+            ) : (
+              <>
+                {sortedData.map((record, index) => {
+                  const key = getRowKey(record, index);
+                  const isSelected = selectedKeys.includes(key);
+                  const isExpanded = isRowExpanded(record);
+                  
+                  return (
+                    <React.Fragment key={key}>
+                      <tr
+                        className={clsx(
+                          {
+                            'bg-gray-50 dark:bg-gray-800': striped && index % 2 === 1,
+                            'hover:bg-gray-50 dark:hover:bg-gray-800': hoverable,
+                            'bg-indigo-50 dark:bg-indigo-900/20': isSelected,
+                            'cursor-pointer': onRowClick,
+                          }
+                        )}
+                        onClick={() => onRowClick?.(record, index)}
+                      >
+                        {/* 选择列 */}
+                        {selectable && (
+                          <td className={clsx(cellPaddingClasses[size])}>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleSelectRow(record, index, e.target.checked);
+                              }}
+                              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            />
+                          </td>
+                        )}
+                        
+                        {/* 展开列 */}
+                        {expandable && (
+                          <td className={clsx(cellPaddingClasses[size])}>
+                            {(!expandable.rowExpandable || expandable.rowExpandable(record)) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleExpand(record, index);
+                                }}
+                                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              >
+                                <ChevronRightIcon 
+                                  className={clsx(
+                                    'h-4 w-4 transition-transform',
+                                    { 'rotate-90': isExpanded }
+                                  )}
+                                />
+                              </button>
+                            )}
+                          </td>
+                        )}
+
+                        {/* 数据列 */}
+                        {columns.map((column) => {
+                          let value = record;
+                          if (column.dataIndex) {
+                            value = record[column.dataIndex];
+                          }
+                          
+                          const cellContent = column.render 
+                            ? column.render(value, record, index)
+                            : (typeof value === 'object' ? JSON.stringify(value) : String(value ?? ''));
+
+                          return (
+                            <td
+                              key={column.key}
+                              className={clsx(
+                                cellPaddingClasses[size],
+                                sizeClasses[size],
+                                'text-gray-900 dark:text-gray-100',
+                                {
+                                  'text-left': column.align === 'left' || !column.align,
+                                  'text-center': column.align === 'center',
+                                  'text-right': column.align === 'right',
+                                  'sticky left-0 bg-white dark:bg-gray-900': column.fixed === 'left',
+                                  'sticky right-0 bg-white dark:bg-gray-900': column.fixed === 'right',
+                                },
+                                column.className
+                              )}
+                              style={{ width: column.width }}
+                            >
+                              {cellContent}
+                            </td>
+                          );
+                        })}
+                      </tr>
+
+                      {/* 展开内容 */}
+                      {expandable && isExpanded && (
+                        <tr>
+                          <td 
+                            colSpan={columns.length + (selectable ? 1 : 0) + 1}
+                            className="p-0"
+                          >
+                            <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                              {expandable.expandedRowRender(record)}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 分页器 */}
+      {pagination && (
+        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              共 {pagination.total} 条记录
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => pagination.onChange(pagination.current - 1)}
+                disabled={pagination.current <= 1}
+                className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                上一页
+              </button>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                第 {pagination.current} 页，共 {Math.ceil(pagination.total / pagination.pageSize)} 页
+              </span>
+              <button
+                onClick={() => pagination.onChange(pagination.current + 1)}
+                disabled={pagination.current >= Math.ceil(pagination.total / pagination.pageSize)}
+                className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Table;

@@ -21,9 +21,11 @@ import {
   ArchiveBoxIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
+dayjs.extend(relativeTime);
+dayjs.locale('zh-cn');
 const TeamDetailPage: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
@@ -160,10 +162,7 @@ const TeamDetailPage: React.FC = () => {
                 <div className="flex items-center space-x-1">
                   <ClockIcon className="h-4 w-4" />
                   <span>
-                    创建于 {formatDistanceToNow(new Date(team.createdAt), { 
-                      addSuffix: true, 
-                      locale: zhCN 
-                    })}
+                    创建于 {dayjs(team.createdAt).fromNow()}
                   </span>
                 </div>
               </div>

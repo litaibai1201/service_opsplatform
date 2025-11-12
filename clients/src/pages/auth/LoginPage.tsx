@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { Button, Input, Checkbox, Tooltip } from '@/components/ui';
-import { AuthLayout } from '@/components/layout';
+// AuthLayout is handled by App.tsx routing
 import { validateEmail, validatePassword } from '@/utils/validation';
 import { EyeIcon, EyeSlashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import type { LoginRequest } from '@/services/api/authApi';
@@ -62,7 +62,10 @@ const LoginPage: React.FC = () => {
     try {
       const { authApi } = await import('@/services/api/authApi');
       const captcha = await authApi.getCaptcha();
-      setCaptchaData(captcha);
+      setCaptchaData({
+        id: captcha.captchaId,
+        image: captcha.captchaImage
+      });
       setFormData(prev => ({ ...prev, captcha: '' }));
     } catch (error) {
       console.error('Failed to fetch captcha:', error);
@@ -78,7 +81,7 @@ const LoginPage: React.FC = () => {
   const handleInputChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const value = e.target.value;
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // 清除相关错误
@@ -89,6 +92,11 @@ const LoginPage: React.FC = () => {
       setFormErrors(prev => ({ ...prev, general: undefined }));
       clearError();
     }
+  };
+
+  // 处理复选框变化
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, rememberMe: checked }));
   };
 
   // 验证表单
@@ -150,7 +158,6 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <AuthLayout>
       <div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">登录账户</h2>
         <p className="text-gray-600 mb-8">欢迎回到 Service Ops Platform</p>
@@ -264,7 +271,7 @@ const LoginPage: React.FC = () => {
           <Checkbox
             id="rememberMe"
             checked={formData.rememberMe}
-            onChange={handleInputChange('rememberMe')}
+            onChange={handleCheckboxChange}
             disabled={isLoading}
             label="记住我"
           />
@@ -343,7 +350,6 @@ const LoginPage: React.FC = () => {
         </div>
         </form>
       </div>
-    </AuthLayout>
   );
 };
 

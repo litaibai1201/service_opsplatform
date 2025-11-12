@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { Button, Input, Checkbox, Tooltip } from '@/components/ui';
-import { AuthLayout } from '@/components/layout';
+// AuthLayout is handled by App.tsx routing
 import { validateEmail, validatePassword, validateUsername } from '@/utils/validation';
 import { EyeIcon, EyeSlashIcon, InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import type { RegisterRequest } from '@/services/api/authApi';
@@ -81,7 +81,10 @@ const RegisterPage: React.FC = () => {
     try {
       const { authApi } = await import('@/services/api/authApi');
       const captcha = await authApi.getCaptcha();
-      setCaptchaData(captcha);
+      setCaptchaData({
+        id: captcha.captchaId,
+        image: captcha.captchaImage
+      });
       setFormData(prev => ({ ...prev, captcha: '' }));
     } catch (error) {
       console.error('Failed to fetch captcha:', error);
@@ -154,7 +157,7 @@ const RegisterPage: React.FC = () => {
   const handleInputChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const value = e.target.value;
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // 清除相关错误
@@ -164,6 +167,15 @@ const RegisterPage: React.FC = () => {
     if (formErrors.general) {
       setFormErrors(prev => ({ ...prev, general: undefined }));
       clearError();
+    }
+  };
+
+  // 处理复选框变化
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, agreementAccepted: checked }));
+    // 清除相关错误
+    if (formErrors.agreementAccepted) {
+      setFormErrors(prev => ({ ...prev, agreementAccepted: undefined }));
     }
   };
 
@@ -313,7 +325,6 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <AuthLayout>
       <div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">创建账户</h2>
         <p className="text-gray-600 mb-8">加入 Service Ops Platform，开始协作之旅</p>
@@ -523,22 +534,20 @@ const RegisterPage: React.FC = () => {
           <Checkbox
             id="agreementAccepted"
             checked={formData.agreementAccepted}
-            onChange={handleInputChange('agreementAccepted')}
+            onChange={handleCheckboxChange}
             disabled={isLoading}
             error={formErrors.agreementAccepted}
-            label={
-              <span className="text-sm text-gray-600">
-                我已阅读并同意{' '}
-                <Link to="/terms" className="text-blue-600 hover:text-blue-800">
-                  用户协议
-                </Link>
-                {' '}和{' '}
-                <Link to="/privacy" className="text-blue-600 hover:text-blue-800">
-                  隐私政策
-                </Link>
-              </span>
-            }
           />
+          <span className="text-sm text-gray-600 ml-2">
+            我已阅读并同意{' '}
+            <Link to="/terms" className="text-blue-600 hover:text-blue-800">
+              用户协议
+            </Link>
+            {' '}和{' '}
+            <Link to="/privacy" className="text-blue-600 hover:text-blue-800">
+              隐私政策
+            </Link>
+          </span>
         </div>
 
         {/* 注册按钮 */}
@@ -567,7 +576,6 @@ const RegisterPage: React.FC = () => {
         </div>
         </form>
       </div>
-    </AuthLayout>
   );
 };
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { Button, Input, Tooltip } from '@/components/ui';
-import { AuthLayout } from '@/components/layout';
+// AuthLayout is handled by App.tsx routing
 import { validateEmail } from '@/utils/validation';
 import { InformationCircleIcon, CheckCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import type { ForgotPasswordRequest } from '@/services/api/authApi';
@@ -64,7 +64,10 @@ const ForgotPasswordPage: React.FC = () => {
     try {
       const { authApi } = await import('@/services/api/authApi');
       const captcha = await authApi.getCaptcha();
-      setCaptchaData(captcha);
+      setCaptchaData({
+        id: captcha.captchaId,
+        image: captcha.captchaImage
+      });
       setFormData(prev => ({ ...prev, captcha: '' }));
     } catch (error) {
       console.error('Failed to fetch captcha:', error);
@@ -159,7 +162,7 @@ const ForgotPasswordPage: React.FC = () => {
   // 如果已提交，显示成功页面
   if (isSubmitted) {
     return (
-      <AuthLayout>
+      <div>
         <div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">重置密码邮件已发送</h2>
           <p className="text-gray-600 mb-8">我们已向您的邮箱发送了重置密码的邮件</p>
@@ -207,12 +210,12 @@ const ForgotPasswordPage: React.FC = () => {
           </div>
           </div>
         </div>
-      </AuthLayout>
+      </div>
     );
   }
 
   return (
-    <AuthLayout>
+    <div>
       <div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">忘记密码</h2>
         <p className="text-gray-600 mb-8">输入您的邮箱地址，我们将发送重置密码的链接</p>
@@ -338,7 +341,7 @@ const ForgotPasswordPage: React.FC = () => {
         </div>
         </form>
       </div>
-    </AuthLayout>
+    </div>
   );
 };
 
