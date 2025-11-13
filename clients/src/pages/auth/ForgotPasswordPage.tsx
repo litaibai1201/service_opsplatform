@@ -9,12 +9,10 @@ import type { ForgotPasswordRequest } from '@/services/api/authApi';
 
 interface FormData {
   email: string;
-  captcha: string;
 }
 
 interface FormErrors {
   email?: string;
-  captcha?: string;
   general?: string;
 }
 
@@ -24,17 +22,11 @@ const ForgotPasswordPage: React.FC = () => {
   
   const [formData, setFormData] = useState<FormData>({
     email: '',
-    captcha: '',
   });
-  
+
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  
-  const [captchaData, setCaptchaData] = useState<{
-    id: string;
-    image: string;
-  } | null>(null);
 
   // 如果已登录，重定向到仪表板
   useEffect(() => {
@@ -58,26 +50,6 @@ const ForgotPasswordPage: React.FC = () => {
     }
     return () => clearTimeout(timer);
   }, [countdown]);
-
-  // 获取验证码
-  const fetchCaptcha = async () => {
-    try {
-      const { authApi } = await import('@/services/api/authApi');
-      const captcha = await authApi.getCaptcha();
-      setCaptchaData({
-        id: captcha.captchaId,
-        image: captcha.captchaImage
-      });
-      setFormData(prev => ({ ...prev, captcha: '' }));
-    } catch (error) {
-      console.error('Failed to fetch captcha:', error);
-    }
-  };
-
-  // 初始化验证码
-  useEffect(() => {
-    fetchCaptcha();
-  }, []);
 
   // 处理输入变化
   const handleInputChange = (field: keyof FormData) => (
@@ -107,11 +79,6 @@ const ForgotPasswordPage: React.FC = () => {
       errors.email = '请输入有效的邮箱地址';
     }
 
-    // 验证验证码
-    if (captchaData && !formData.captcha) {
-      errors.captcha = '请输入验证码';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -124,38 +91,26 @@ const ForgotPasswordPage: React.FC = () => {
 
     const forgotPasswordData: ForgotPasswordRequest = {
       email: formData.email,
-      captcha: formData.captcha || undefined,
     };
 
     const success = await forgotPassword(forgotPasswordData);
-    
+
     if (success) {
       setIsSubmitted(true);
       setCountdown(60); // 60秒倒计时
-    } else {
-      // 发送失败后刷新验证码
-      if (captchaData) {
-        fetchCaptcha();
-      }
     }
   };
 
   // 重新发送
   const handleResend = async () => {
     if (countdown > 0) return;
-    
+
     const success = await forgotPassword({
       email: formData.email,
-      captcha: formData.captcha,
     });
-    
+
     if (success) {
       setCountdown(60);
-    } else {
-      // 发送失败后刷新验证码
-      if (captchaData) {
-        fetchCaptcha();
-      }
     }
   };
 
@@ -253,47 +208,6 @@ const ForgotPasswordPage: React.FC = () => {
             请输入您注册时使用的邮箱地址，我们将向该邮箱发送重置密码的链接
           </p>
         </div>
-
-        {/* 验证码 */}
-        {captchaData && (
-          <div>
-            <label htmlFor="captcha" className="block text-sm font-medium text-gray-700 mb-2">
-              验证码
-            </label>
-            <div className="flex space-x-3">
-              <div className="flex-1">
-                <Input
-                  id="captcha"
-                  type="text"
-                  value={formData.captcha}
-                  onChange={handleInputChange('captcha')}
-                  placeholder="请输入验证码"
-                  error={formErrors.captcha}
-                  disabled={isLoading}
-                  autoComplete="off"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  src={captchaData.image}
-                  alt="验证码"
-                  className="h-10 w-20 border border-gray-300 rounded cursor-pointer"
-                  onClick={fetchCaptcha}
-                />
-                <Tooltip content="点击刷新验证码">
-                  <button
-                    type="button"
-                    onClick={fetchCaptcha}
-                    disabled={isLoading}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    刷新
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 发送重置邮件按钮 */}
         <Button

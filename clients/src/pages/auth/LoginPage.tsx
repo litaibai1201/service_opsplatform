@@ -11,13 +11,11 @@ interface FormData {
   email: string;
   password: string;
   rememberMe: boolean;
-  captcha: string;
 }
 
 interface FormErrors {
   email?: string;
   password?: string;
-  captcha?: string;
   general?: string;
 }
 
@@ -30,15 +28,10 @@ const LoginPage: React.FC = () => {
     email: '',
     password: '',
     rememberMe: false,
-    captcha: '',
   });
-  
+
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaData, setCaptchaData] = useState<{
-    id: string;
-    image: string;
-  } | null>(null);
 
   // 获取重定向路径
   const from = (location.state as any)?.from?.pathname || '/dashboard';
@@ -56,26 +49,6 @@ const LoginPage: React.FC = () => {
       setFormErrors(prev => ({ ...prev, general: error }));
     }
   }, [error]);
-
-  // 获取验证码
-  const fetchCaptcha = async () => {
-    try {
-      const { authApi } = await import('@/services/api/authApi');
-      const captcha = await authApi.getCaptcha();
-      setCaptchaData({
-        id: captcha.captchaId,
-        image: captcha.captchaImage
-      });
-      setFormData(prev => ({ ...prev, captcha: '' }));
-    } catch (error) {
-      console.error('Failed to fetch captcha:', error);
-    }
-  };
-
-  // 初始化验证码
-  useEffect(() => {
-    fetchCaptcha();
-  }, []);
 
   // 处理输入变化
   const handleInputChange = (field: keyof FormData) => (
@@ -117,11 +90,6 @@ const LoginPage: React.FC = () => {
       errors.password = '密码长度至少8位，且包含字母和数字';
     }
 
-    // 验证验证码
-    if (captchaData && !formData.captcha) {
-      errors.captcha = '请输入验证码';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -136,18 +104,12 @@ const LoginPage: React.FC = () => {
       email: formData.email,
       password: formData.password,
       rememberMe: formData.rememberMe,
-      captcha: formData.captcha || undefined,
     };
 
     const success = await login(loginData);
-    
+
     if (success) {
       navigate(from, { replace: true });
-    } else {
-      // 登录失败后刷新验证码
-      if (captchaData) {
-        fetchCaptcha();
-      }
     }
   };
 
@@ -224,47 +186,6 @@ const LoginPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* 验证码 */}
-        {captchaData && (
-          <div>
-            <label htmlFor="captcha" className="block text-sm font-medium text-gray-700 mb-2">
-              验证码
-            </label>
-            <div className="flex space-x-3">
-              <div className="flex-1">
-                <Input
-                  id="captcha"
-                  type="text"
-                  value={formData.captcha}
-                  onChange={handleInputChange('captcha')}
-                  placeholder="请输入验证码"
-                  error={formErrors.captcha}
-                  disabled={isLoading}
-                  autoComplete="off"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  src={captchaData.image}
-                  alt="验证码"
-                  className="h-10 w-20 border border-gray-300 rounded cursor-pointer"
-                  onClick={fetchCaptcha}
-                />
-                <Tooltip content="点击刷新验证码">
-                  <button
-                    type="button"
-                    onClick={fetchCaptcha}
-                    disabled={isLoading}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    刷新
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 记住我和忘记密码 */}
         <div className="flex items-center justify-between">

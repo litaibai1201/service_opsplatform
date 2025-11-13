@@ -49,11 +49,6 @@ export const validatePhone = (phone: string): boolean => {
   return phoneRegex.test(phone);
 };
 
-// 验证码验证
-export const validateCaptcha = (captcha: string): boolean => {
-  return captcha.length === 4 || captcha.length === 6;
-};
-
 // 确认密码验证
 export const validatePasswordConfirm = (password: string, confirmPassword: string): boolean => {
   return password === confirmPassword;

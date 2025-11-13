@@ -7,7 +7,6 @@ export interface LoginRequest {
   email: string;
   password: string;
   rememberMe?: boolean;
-  captcha?: string;
 }
 
 // 登录响应数据
@@ -26,7 +25,6 @@ export interface RegisterRequest {
   password: string;
   confirmPassword: string;
   inviteCode?: string;
-  captcha?: string;
   agreementAccepted: boolean;
 }
 
@@ -40,7 +38,6 @@ export interface RegisterResponse {
 // 忘记密码请求数据
 export interface ForgotPasswordRequest {
   email: string;
-  captcha?: string;
 }
 
 // 重置密码请求数据
@@ -262,20 +259,6 @@ class AuthApiService {
   }> {
     const response = await httpClient.get(
       `/auth/check-email/${encodeURIComponent(email)}`,
-      { skipAuth: true }
-    );
-    return response.data;
-  }
-
-  /**
-   * 获取验证码（图形验证码）
-   */
-  async getCaptcha(): Promise<{
-    captchaId: string;
-    captchaImage: string; // base64
-  }> {
-    const response = await httpClient.get(
-      '/auth/captcha',
       { skipAuth: true }
     );
     return response.data;

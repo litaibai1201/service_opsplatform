@@ -13,7 +13,6 @@ interface FormData {
   password: string;
   confirmPassword: string;
   inviteCode: string;
-  captcha: string;
   agreementAccepted: boolean;
 }
 
@@ -23,7 +22,6 @@ interface FormErrors {
   password?: string;
   confirmPassword?: string;
   inviteCode?: string;
-  captcha?: string;
   agreementAccepted?: string;
   general?: string;
 }
@@ -44,10 +42,9 @@ const RegisterPage: React.FC = () => {
     password: '',
     confirmPassword: '',
     inviteCode: '',
-    captcha: '',
     agreementAccepted: false,
   });
-  
+
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -56,11 +53,6 @@ const RegisterPage: React.FC = () => {
     email: null,
     inviteCode: null,
   });
-  
-  const [captchaData, setCaptchaData] = useState<{
-    id: string;
-    image: string;
-  } | null>(null);
 
   // 如果已登录，重定向到仪表板
   useEffect(() => {
@@ -75,26 +67,6 @@ const RegisterPage: React.FC = () => {
       setFormErrors(prev => ({ ...prev, general: error }));
     }
   }, [error]);
-
-  // 获取验证码
-  const fetchCaptcha = async () => {
-    try {
-      const { authApi } = await import('@/services/api/authApi');
-      const captcha = await authApi.getCaptcha();
-      setCaptchaData({
-        id: captcha.captchaId,
-        image: captcha.captchaImage
-      });
-      setFormData(prev => ({ ...prev, captcha: '' }));
-    } catch (error) {
-      console.error('Failed to fetch captcha:', error);
-    }
-  };
-
-  // 初始化验证码
-  useEffect(() => {
-    fetchCaptcha();
-  }, []);
 
   // 检查用户名可用性
   const checkUsernameAvailability = async (username: string) => {
@@ -253,11 +225,6 @@ const RegisterPage: React.FC = () => {
       errors.inviteCode = '邀请码无效';
     }
 
-    // 验证验证码
-    if (captchaData && !formData.captcha) {
-      errors.captcha = '请输入验证码';
-    }
-
     // 验证协议同意
     if (!formData.agreementAccepted) {
       errors.agreementAccepted = '请阅读并同意用户协议和隐私政策';
@@ -279,31 +246,25 @@ const RegisterPage: React.FC = () => {
       password: formData.password,
       confirmPassword: formData.confirmPassword,
       inviteCode: formData.inviteCode || undefined,
-      captcha: formData.captcha || undefined,
       agreementAccepted: formData.agreementAccepted,
     };
 
     const result = await register(registerData);
-    
+
     if (result) {
       if (result.requiresEmailVerification) {
-        navigate('/verify-email', { 
-          state: { 
+        navigate('/verify-email', {
+          state: {
             email: formData.email,
             message: '注册成功，请查收邮件完成验证'
           }
         });
       } else {
-        navigate('/login', { 
-          state: { 
-            message: '注册成功，请登录' 
+        navigate('/login', {
+          state: {
+            message: '注册成功，请登录'
           }
         });
-      }
-    } else {
-      // 注册失败后刷新验证码
-      if (captchaData) {
-        fetchCaptcha();
       }
     }
   };
@@ -487,47 +448,6 @@ const RegisterPage: React.FC = () => {
             <p className="mt-1 text-sm text-green-600">邀请码有效</p>
           )}
         </div>
-
-        {/* 验证码 */}
-        {captchaData && (
-          <div>
-            <label htmlFor="captcha" className="block text-sm font-medium text-gray-700 mb-2">
-              验证码
-            </label>
-            <div className="flex space-x-3">
-              <div className="flex-1">
-                <Input
-                  id="captcha"
-                  type="text"
-                  value={formData.captcha}
-                  onChange={handleInputChange('captcha')}
-                  placeholder="请输入验证码"
-                  error={formErrors.captcha}
-                  disabled={isLoading}
-                  autoComplete="off"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  src={captchaData.image}
-                  alt="验证码"
-                  className="h-10 w-20 border border-gray-300 rounded cursor-pointer"
-                  onClick={fetchCaptcha}
-                />
-                <Tooltip content="点击刷新验证码">
-                  <button
-                    type="button"
-                    onClick={fetchCaptcha}
-                    disabled={isLoading}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    刷新
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 用户协议 */}
         <div>
