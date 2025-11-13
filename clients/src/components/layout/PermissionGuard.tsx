@@ -3,6 +3,9 @@ import { UserRole } from '@/types/entities';
 import { usePermissions } from './ProtectedRoute';
 import { NoAccessState } from '../ui/EmptyState';
 
+// 重新导出 usePermissions，以便其他组件可以从这里导入
+export { usePermissions };
+
 interface PermissionGuardProps {
   children: React.ReactNode;
   

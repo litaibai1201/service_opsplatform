@@ -28,16 +28,5 @@ export {
 } from './useAuthValidation';
 export type { ValidationState, UseAuthValidationReturn } from './useAuthValidation';
 
-// 便捷组合Hook
-export const useAuthModule = () => {
-  return {
-    useAuth,
-    useLogin: useQuickLogin,
-    useRegister: useQuickRegister,
-    usePasswordReset,
-    useAuthValidation,
-  };
-};
-
 // 默认导出主要Hook
 export default useAuth;
