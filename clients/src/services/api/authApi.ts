@@ -81,12 +81,30 @@ class AuthApiService {
    * 用户登录
    */
   async login(data: LoginRequest): Promise<LoginResponse> {
-    const response = await httpClient.post<LoginResponse>(
+    const response = await httpClient.post<any>(
       API_CONFIG.ENDPOINTS.AUTH.LOGIN,
       data,
       { skipAuth: true }
     );
-    return response.data;
+    // 后端返回格式: { code, content: { access_token, refresh_token, user_info, ... }, msg }
+    // 需要从 content 字段提取数据并转换字段名
+    const result = response.content || response.data || response;
+
+    // 验证必需字段是否存在
+    const accessToken = result.access_token || result.accessToken;
+    const refreshToken = result.refresh_token || result.refreshToken;
+
+    if (!accessToken) {
+      throw new Error('登录响应缺少访问令牌');
+    }
+
+    return {
+      user: result.user_info || result.user || {},
+      accessToken,
+      refreshToken: refreshToken || '',
+      expiresIn: result.expires_in || result.expiresIn || 3600,
+      permissions: result.permissions || []
+    };
   }
 
   /**

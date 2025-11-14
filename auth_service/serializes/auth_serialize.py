@@ -65,20 +65,44 @@ class UserRegisterSchema(Schema):
 
 class UserLoginSchema(Schema):
     """用户登录请求参数"""
+    # 支持两种字段名：credential (后端标准) 和 email (前端使用)
     credential = fields.String(
-        required=True,
+        required=False,
         validate=validate.Length(min=1, max=100),
         metadata={"description": "登錄憑證(用戶名或郵箱)"}
+    )
+    email = fields.String(
+        required=False,
+        validate=validate.Length(min=1, max=100),
+        metadata={"description": "郵箱地址"}
     )
     password = fields.String(
         required=True,
         validate=validate.Length(min=1, max=128),
         metadata={"description": "密碼"}
     )
+    # 支持两种字段名：remember_me (后端标准) 和 rememberMe (前端使用)
     remember_me = fields.Boolean(
         missing=False,
         metadata={"description": "記住我"}
     )
+    rememberMe = fields.Boolean(
+        missing=False,
+        metadata={"description": "記住我"}
+    )
+
+    @validates_schema
+    def validate_credential_or_email(self, data, **kwargs):
+        """验证至少提供 credential 或 email 其中之一"""
+        credential = data.get('credential')
+        email = data.get('email')
+
+        if not credential and not email:
+            raise ValidationError("必須提供登錄憑證或郵箱", field_name='credential')
+
+        # 如果提供了 email，将其复制到 credential 字段供控制器使用
+        if email and not credential:
+            data['credential'] = email
 
 
 class TokenRefreshRequestSchema(Schema):

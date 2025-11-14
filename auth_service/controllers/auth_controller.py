@@ -311,23 +311,26 @@ class AuthController:
             )
             
             def _login_transaction():
+                # 获取客户端信息
+                client_info = self._get_client_info()
+
                 # 创建用户会话
                 session_result, session_flag = self._create_user_session(user.id, session_id, refresh_token)
                 if not session_flag:
                     raise Exception(f"創建用戶會話失敗: {session_result}")
-                
+
                 # 更新最后登录时间
                 login_result, login_flag = self.oper_user.update_last_login(
-                    user, self._get_client_info()['ip_address']
+                    user, client_info['ip_address']
                 )
                 if not login_flag:
                     logger.warning(f"更新最後登錄時間失敗: {login_result}")
-                
+
                 # 记录成功登录
                 attempt_result, attempt_flag = self._record_successful_login(user, credential)
                 if not attempt_flag:
                     logger.warning(f"記錄成功登錄失敗: {attempt_result}")
-                
+
                 # 缓存用户信息以提高后续访问性能
                 user_info = {
                     'user_id': user.id,
@@ -341,7 +344,7 @@ class AuthController:
                     'avatar_url': user.avatar_url
                 }
                 token_cache.cache_user_info(str(user.id), user_info)
-                
+
                 # 缓存会话信息
                 session_info = {
                     'session_id': session_id,
