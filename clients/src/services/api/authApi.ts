@@ -93,12 +93,21 @@ class AuthApiService {
    * 用户注册
    */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    const response = await httpClient.post<RegisterResponse>(
+    const response = await httpClient.post<any>(
       API_CONFIG.ENDPOINTS.AUTH.REGISTER,
       data,
       { skipAuth: true }
     );
-    return response.data;
+    // 后端返回格式: { code, content: RegisterResponse, msg }
+    // 需要从 content 字段提取数据
+    const result = response.content || response.data || response;
+
+    // 确保返回的数据符合 RegisterResponse 接口
+    return {
+      user: result.user || result,
+      message: result.message || response.msg || '注册成功',
+      requiresEmailVerification: result.requiresEmailVerification || false
+    };
   }
 
   /**
@@ -244,11 +253,13 @@ class AuthApiService {
     available: boolean;
     suggestions?: string[];
   }> {
-    const response = await httpClient.get(
+    const response = await httpClient.get<any>(
       `/auth/check-username/${encodeURIComponent(username)}`,
       { skipAuth: true }
     );
-    return response.data;
+    // 后端返回格式: { code, content: { available, username, suggestions? }, msg }
+    // 需要从 content 字段提取数据
+    return response.content || response.data || response;
   }
 
   /**
@@ -257,11 +268,13 @@ class AuthApiService {
   async checkEmailAvailability(email: string): Promise<{
     available: boolean;
   }> {
-    const response = await httpClient.get(
+    const response = await httpClient.get<any>(
       `/auth/check-email/${encodeURIComponent(email)}`,
       { skipAuth: true }
     );
-    return response.data;
+    // 后端返回格式: { code, content: { available, email }, msg }
+    // 需要从 content 字段提取数据
+    return response.content || response.data || response;
   }
 
   /**

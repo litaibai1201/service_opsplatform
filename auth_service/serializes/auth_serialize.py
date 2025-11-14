@@ -427,6 +427,11 @@ class UserRegisterSchema(Schema):
         validate=validate.Length(min=6, max=128),
         metadata={"description": "密碼"}
     )
+    confirmPassword = fields.String(
+        required=True,
+        validate=validate.Length(min=6, max=128),
+        metadata={"description": "確認密碼"}
+    )
     display_name = fields.String(
         missing="",
         validate=validate.Length(max=255),
@@ -450,20 +455,46 @@ class UserRegisterSchema(Schema):
         validate=validate.Length(max=10),
         metadata={"description": "語言偏好"}
     )
-    
+    inviteCode = fields.String(
+        missing="",
+        validate=validate.Length(max=50),
+        metadata={"description": "邀請碼"}
+    )
+    agreementAccepted = fields.Boolean(
+        required=True,
+        metadata={"description": "是否同意用戶協議"}
+    )
+
     @validates_schema
     def validate_password_strength(self, data, **kwargs):
         """验证密码强度"""
         password = data.get('password', '')
         if len(password) < 6:
             raise ValidationError("密碼長度至少6位", field_name='password')
-        
+
         # 检查是否包含数字和字母
         has_digit = any(c.isdigit() for c in password)
         has_letter = any(c.isalpha() for c in password)
-        
+
         if not (has_digit and has_letter):
             raise ValidationError("密碼必須包含字母和數字", field_name='password')
+
+    @validates_schema
+    def validate_passwords_match(self, data, **kwargs):
+        """验证两次密码是否一致"""
+        password = data.get('password')
+        confirm_password = data.get('confirmPassword')
+
+        if password and confirm_password and password != confirm_password:
+            raise ValidationError("兩次輸入的密碼不一致", field_name='confirmPassword')
+
+    @validates_schema
+    def validate_agreement(self, data, **kwargs):
+        """验证是否同意用户协议"""
+        agreement_accepted = data.get('agreementAccepted', False)
+
+        if not agreement_accepted:
+            raise ValidationError("必須同意用戶協議才能註冊", field_name='agreementAccepted')
 
 
 class SessionInfoSchema(Schema):

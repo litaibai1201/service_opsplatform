@@ -251,7 +251,8 @@ const RegisterPage: React.FC = () => {
 
     const result = await register(registerData);
 
-    if (result) {
+    // 注册成功时，result 不为 null
+    if (result && typeof result === 'object') {
       if (result.requiresEmailVerification) {
         navigate('/verify-email', {
           state: {
@@ -267,6 +268,7 @@ const RegisterPage: React.FC = () => {
         });
       }
     }
+    // 注册失败时，result 为 null，错误信息已通过 toast 显示，这里不需要额外处理
   };
 
   // 获取验证状态图标
