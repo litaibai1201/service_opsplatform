@@ -21,7 +21,7 @@ from serializes.auth_serialize import (
     TwoFactorVerifySchema, TwoFactorDisableSchema, InternalTokenValidateSchema,
     UserBatchRequestSchema, UserProfileUpdateSchema, AdminUsersQuerySchema,
     UpdatePlatformRoleSchema, SuspendUserSchema, InternalCheckPlatformPermissionSchema,
-    CacheWarmUpSchema
+    CacheWarmUpSchema, CheckUsernameAvailabilityResponseSchema, CheckEmailAvailabilityResponseSchema
 )
 from common.common_tools import CommonTools
 from loggers import logger
@@ -62,6 +62,46 @@ class UserRegisterApi(BaseAuthView):
             return self._build_response(result, flag, "註冊成功")
         except Exception as e:
             logger.error(f"用戶註冊異常: {str(e)}")
+            return fail_response_result(msg="系統內部錯誤，請稍後重試")
+
+
+# ==================== 注册辅助验证API ====================
+
+@blp.route("/auth/check-username/<username>")
+class CheckUsernameAvailabilityApi(BaseAuthView):
+    """检查用户名可用性API"""
+
+    @blp.response(200, RspMsgDictSchema)
+    def get(self, username):
+        """检查用户名是否可用"""
+        try:
+            # URL解码
+            from urllib.parse import unquote
+            username = unquote(username)
+
+            result, flag = self.ac.check_username_availability(username)
+            return self._build_response(result, flag, "查詢成功")
+        except Exception as e:
+            logger.error(f"檢查用戶名可用性異常: {str(e)}")
+            return fail_response_result(msg="系統內部錯誤，請稍後重試")
+
+
+@blp.route("/auth/check-email/<email>")
+class CheckEmailAvailabilityApi(BaseAuthView):
+    """检查邮箱可用性API"""
+
+    @blp.response(200, RspMsgDictSchema)
+    def get(self, email):
+        """检查邮箱是否可用"""
+        try:
+            # URL解码
+            from urllib.parse import unquote
+            email = unquote(email)
+
+            result, flag = self.ac.check_email_availability(email)
+            return self._build_response(result, flag, "查詢成功")
+        except Exception as e:
+            logger.error(f"檢查郵箱可用性異常: {str(e)}")
             return fail_response_result(msg="系統內部錯誤，請稍後重試")
 
 

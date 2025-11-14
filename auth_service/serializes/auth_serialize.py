@@ -628,3 +628,21 @@ class CacheWarmUpSchema(Schema):
         validate=validate.Range(min=1, max=1000),
         metadata={"description": "预热数量限制"}
     )
+
+
+# ==================== 注册辅助验证Schema ====================
+
+class CheckUsernameAvailabilityResponseSchema(Schema):
+    """检查用户名可用性响应Schema"""
+    available = fields.Boolean(metadata={"description": "用户名是否可用"})
+    username = fields.String(metadata={"description": "查询的用户名"})
+    suggestions = fields.List(
+        fields.String(),
+        metadata={"description": "用户名建议列表（当不可用时）"}
+    )
+
+
+class CheckEmailAvailabilityResponseSchema(Schema):
+    """检查邮箱可用性响应Schema"""
+    available = fields.Boolean(metadata={"description": "邮箱是否可用"})
+    email = fields.String(metadata={"description": "查询的邮箱地址"})

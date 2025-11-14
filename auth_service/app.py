@@ -150,4 +150,4 @@ if __name__ == "__main__":
     app = create_app(app)
     print("===================Auth starting============================")
     # serve(app, host="0.0.0.0", port=8000, threads=30)
-    app.run(SERVER_HOST, SERVER_PORT, debug=True)
+    app.run(SERVER_HOST, 8000, debug=True)

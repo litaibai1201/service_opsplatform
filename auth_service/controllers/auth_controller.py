@@ -1362,7 +1362,7 @@ class AuthController:
         """缓存预热 - 预先加载热点用户数据"""
         try:
             warmed_users = 0
-            
+
             if user_ids:
                 # 预热指定用户
                 target_user_ids = user_ids[:limit]
@@ -1374,21 +1374,132 @@ class AuthController:
                 ).order_by(
                     self.oper_user.model.last_login_at.desc()
                 ).limit(limit).all()
-                
+
                 target_user_ids = [user.id for user in recent_users]
-            
+
             if target_user_ids:
                 # 批量获取用户信息（这会自动缓存）
                 result, flag = self.get_user_batch(target_user_ids)
                 if flag:
                     warmed_users = len(result.get('users', []))
-            
+
             return {
                 'warmed_users': warmed_users,
                 'target_count': len(target_user_ids) if target_user_ids else 0,
                 'message': f'成功预热{warmed_users}个用户的缓存'
             }, True
-            
+
         except Exception as e:
             logger.error(f"缓存预热异常: {str(e)}")
             return "缓存预热失败", False
+
+    # ==================== 注册辅助验证方法 ====================
+
+    def check_username_availability(self, username: str) -> Tuple[Any, bool]:
+        """检查用户名是否可用 - 带缓存和防枚举"""
+        try:
+            # 1. 验证用户名格式
+            if not username or len(username) < 3 or len(username) > 20:
+                return {
+                    'available': False,
+                    'username': username,
+                    'error': '用户名长度必须在3-20位之间'
+                }, True  # 查询成功，只是格式不正确
+
+            # 用户名只能包含字母、数字和下划线，且不能以数字开头
+            import re
+            if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', username):
+                return {
+                    'available': False,
+                    'username': username,
+                    'error': '用户名只能包含字母、数字和下划线，且不能以数字开头'
+                }, True  # 查询成功，只是格式不正确
+
+            # 2. 检查缓存
+            cache_key = f"username_check:{username.lower()}"
+            cached_result = redis_client.get(cache_key)
+            if cached_result:
+                try:
+                    import json
+                    return json.loads(cached_result), True
+                except:
+                    pass
+
+            # 3. 查询数据库
+            existing_user = self.oper_user.get_by_username(username)
+            available = existing_user is None
+
+            result = {
+                'available': available,
+                'username': username
+            }
+
+            # 4. 如果不可用，提供建议
+            if not available:
+                suggestions = []
+                for i in range(1, 4):
+                    suggestion = f"{username}{secrets.randbelow(9999):04d}"
+                    # 检查建议的用户名是否可用
+                    if not self.oper_user.get_by_username(suggestion):
+                        suggestions.append(suggestion)
+
+                result['suggestions'] = suggestions[:3]  # 只返回前3个建议
+
+            # 5. 缓存结果（5分钟）
+            try:
+                import json
+                redis_client.setex(cache_key, 300, json.dumps(result))
+            except Exception as cache_error:
+                logger.warning(f"缓存用户名检查结果失败: {str(cache_error)}")
+
+            return result, True
+
+        except Exception as e:
+            logger.error(f"检查用户名可用性异常: {str(e)}")
+            traceback.print_exc()
+            return "检查用户名可用性失败", False
+
+    def check_email_availability(self, email: str) -> Tuple[Any, bool]:
+        """检查邮箱是否可用 - 带缓存和防枚举"""
+        try:
+            # 1. 验证邮箱格式
+            email_error = self._validate_email_format(email)
+            if email_error:
+                return {
+                    'available': False,
+                    'email': email,
+                    'error': email_error
+                }, True  # 查询成功，只是格式不正确
+
+            # 2. 检查缓存
+            cache_key = f"email_check:{email.lower()}"
+            cached_result = redis_client.get(cache_key)
+            if cached_result:
+                try:
+                    import json
+                    return json.loads(cached_result), True
+                except:
+                    pass
+
+            # 3. 查询数据库（使用小写邮箱进行比较）
+            existing_user = self.oper_user.get_by_email(email.lower())
+            available = existing_user is None
+
+            result = {
+                'available': available,
+                'email': email
+            }
+
+            # 4. 缓存结果（5分钟）
+            try:
+                import json
+                redis_client.setex(cache_key, 300, json.dumps(result))
+            except Exception as cache_error:
+                logger.warning(f"缓存邮箱检查结果失败: {str(cache_error)}")
+
+            return result, True
+
+        except Exception as e:
+            logger.error(f"检查邮箱可用性异常: {str(e)}")
+            traceback.print_exc()
+            return "检查邮箱可用性失败", False
