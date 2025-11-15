@@ -48,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
-    dispatch(setTheme(newTheme));
+    dispatch(setTheme({ mode: newTheme }));
   };
 
   const handleLogout = () => {
@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({
     system: ComputerDesktopIcon,
   };
 
-  const ThemeIcon = themeIcons[theme];
+  const ThemeIcon = themeIcons[theme.mode];
 
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">

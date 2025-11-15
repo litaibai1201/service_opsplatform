@@ -153,17 +153,31 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    
+
     updateLastActivity: (state) => {
       state.lastActivity = Date.now();
     },
-    
+
     updateUserProfile: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
     },
-    
+
+    setAuthData: (state, action: PayloadAction<{ user: User; token: string; refreshToken: string }>) => {
+      const { user, token, refreshToken } = action.payload;
+      state.user = user;
+      state.token = token;
+      state.refreshToken = refreshToken;
+      state.isAuthenticated = true;
+      state.lastActivity = Date.now();
+      state.error = null;
+
+      // 保存到本地存储
+      storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
+      storage.set(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    },
+
     clearAuth: (state) => {
       state.user = null;
       state.token = null;
@@ -171,7 +185,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
       state.lastActivity = null;
-      
+
       // 清除本地存储
       storage.remove(STORAGE_KEYS.AUTH_TOKEN);
       storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
@@ -321,7 +335,7 @@ const authSlice = createSlice({
 });
 
 // 导出 actions
-export const { clearError, updateLastActivity, updateUserProfile, clearAuth } = authSlice.actions;
+export const { clearError, updateLastActivity, updateUserProfile, setAuthData, clearAuth } = authSlice.actions;
 
 // 导出 selectors
 export const selectAuth = (state: { auth: AuthState }) => state.auth;

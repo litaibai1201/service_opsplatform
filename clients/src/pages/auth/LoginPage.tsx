@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAppDispatch } from '@/store';
+import { setAuthData } from '@/store/slices/authSlice';
+import { authApi } from '@/services/api/authApi';
+import type { LoginRequest } from '@/services/api/authApi';
 import { Button, Input, Checkbox, Tooltip } from '@/components/ui';
+import { showToast } from '@/components/ui/ToastContainer';
 // AuthLayout is handled by App.tsx routing
 import { validateEmail, validatePassword } from '@/utils/validation';
 import { EyeIcon, EyeSlashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
-import type { LoginRequest } from '@/services/api/authApi';
 
 interface FormData {
   email: string;
@@ -22,8 +25,8 @@ interface FormErrors {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
-  
+  const dispatch = useAppDispatch();
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -32,23 +35,10 @@ const LoginPage: React.FC = () => {
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 获取重定向路径
   const from = (location.state as any)?.from?.pathname || '/dashboard';
-
-  // 如果已登录，重定向到目标页面
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, from]);
-
-  // 清除错误
-  useEffect(() => {
-    if (error) {
-      setFormErrors(prev => ({ ...prev, general: error }));
-    }
-  }, [error]);
 
   // 处理输入变化
   const handleInputChange = (field: keyof FormData) => (
@@ -97,19 +87,38 @@ const LoginPage: React.FC = () => {
   // 处理表单提交
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
-    const loginData: LoginRequest = {
-      email: formData.email,
-      password: formData.password,
-      rememberMe: formData.rememberMe,
-    };
+    setIsLoading(true);
+    setFormErrors({});
 
-    const success = await login(loginData);
+    try {
+      const loginData: LoginRequest = {
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe,
+      };
 
-    if (success) {
+      const response = await authApi.login(loginData);
+
+      // 更新 Redux store
+      dispatch(setAuthData({
+        user: response.user,
+        token: response.accessToken,
+        refreshToken: response.refreshToken
+      }));
+
+      showToast.success('登录成功');
+
+      // 跳转到目标页面
       navigate(from, { replace: true });
+    } catch (error: any) {
+      const errorMessage = error.message || '登录失败';
+      setFormErrors({ general: errorMessage });
+      showToast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 

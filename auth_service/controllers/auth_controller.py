@@ -359,18 +359,28 @@ class AuthController:
                     'access_token': access_token,
                     'refresh_token': refresh_token,
                     'token_type': 'Bearer',
+                    'expires_in': 3600,  # 1小时
                     'session_id': session_id,
                     'user_info': {
+                        'id': str(user.id),
                         'user_id': user.id,
                         'username': user.username,
                         'email': user.email,
-                        'display_name': user.display_name,
+                        'display_name': user.display_name or user.username,
+                        'avatar_url': user.avatar_url or '',
                         'status': user.status,
                         'platform_role': user.platform_role or 'platform_user',
-                        'email_verified': user.email_verified,
-                        'two_factor_enabled': user.two_factor_enabled,
-                        'avatar_url': user.avatar_url
-                    }
+                        'role': user.platform_role or 'platform_user',  # 前端需要的 role 字段
+                        'email_verified': user.email_verified if user.email_verified is not None else False,
+                        'two_factor_enabled': user.two_factor_enabled if user.two_factor_enabled is not None else False,
+                        'phone_verified': user.phone_verified if user.phone_verified is not None else False,
+                        'timezone': user.timezone or 'UTC',
+                        'language': user.language or 'zh-CN',
+                        'last_login_at': user.last_login_at.isoformat() if user.last_login_at else None,
+                        'created_at': user.created_at.isoformat() if user.created_at else None,
+                        'updated_at': user.updated_at.isoformat() if user.updated_at else None
+                    },
+                    'permissions': []  # 基础权限，可以根据需要扩展
                 }
             
             return self._execute_with_transaction(_login_transaction, "用戶登錄")
@@ -454,18 +464,25 @@ class AuthController:
             
             profile_data = {
                 'user_info': {
+                    'id': str(user.id),  # 添加 id 字段
                     'user_id': user.id,
                     'username': user.username,
                     'email': user.email,
-                    'display_name': user.display_name,
-                    'phone': user.phone,
-                    'avatar_url': user.avatar_url,
+                    'display_name': user.display_name or user.username,
+                    'phone': user.phone or '',
+                    'avatar_url': user.avatar_url or '',
                     'status': user.status,
                     'platform_role': user.platform_role or 'platform_user',
-                    'email_verified': user.email_verified,
-                    'two_factor_enabled': user.two_factor_enabled,
+                    'role': user.platform_role or 'platform_user',  # 添加 role 字段
+                    'permissions': [],  # 添加 permissions 字段
+                    'email_verified': user.email_verified if user.email_verified is not None else False,
+                    'phone_verified': user.phone_verified if user.phone_verified is not None else False,
+                    'two_factor_enabled': user.two_factor_enabled if user.two_factor_enabled is not None else False,
+                    'timezone': user.timezone or 'UTC',  # 添加 timezone 字段
+                    'language': user.language or 'zh-CN',  # 添加 language 字段
                     'last_login_at': user.last_login_at.isoformat() if user.last_login_at else None,
-                    'created_at': user.created_at.isoformat() if user.created_at else None
+                    'created_at': user.created_at.isoformat() if user.created_at else None,
+                    'updated_at': user.updated_at.isoformat() if user.updated_at else None  # 添加 updated_at 字段
                 },
                 'security_info': {
                     'active_sessions': len(active_sessions),

@@ -86,25 +86,62 @@ class AuthApiService {
       data,
       { skipAuth: true }
     );
-    // 后端返回格式: { code, content: { access_token, refresh_token, user_info, ... }, msg }
+
+    // 调试日志
+    console.log('🔍 Login API Response:', response);
+
+    // 后端返回格式: { code, content: { access_token, refresh_token, user_info, permissions, ... }, msg }
     // 需要从 content 字段提取数据并转换字段名
     const result = response.content || response.data || response;
+
+    console.log('🔍 Extracted Result:', result);
 
     // 验证必需字段是否存在
     const accessToken = result.access_token || result.accessToken;
     const refreshToken = result.refresh_token || result.refreshToken;
 
     if (!accessToken) {
+      console.error('❌ 缺少访问令牌:', result);
       throw new Error('登录响应缺少访问令牌');
     }
 
-    return {
-      user: result.user_info || result.user || {},
+    // 转换用户信息字段名（蛇形命名 -> 驼峰命名）
+    const userInfo = result.user_info || result.user || {};
+
+    console.log('🔍 User Info:', userInfo);
+
+    const user = {
+      id: userInfo.id || userInfo.user_id?.toString() || '',
+      username: userInfo.username || '',
+      email: userInfo.email || '',
+      displayName: userInfo.display_name || userInfo.displayName || userInfo.username || '',
+      avatarUrl: userInfo.avatar_url || userInfo.avatarUrl,
+      status: userInfo.status || 'active',
+      platformRole: userInfo.platform_role || userInfo.platformRole || 'platform_user',
+      role: userInfo.role || userInfo.platform_role || userInfo.platformRole || 'platform_user',
+      permissions: userInfo.permissions || [],
+      emailVerified: userInfo.email_verified !== undefined ? userInfo.email_verified : userInfo.emailVerified !== undefined ? userInfo.emailVerified : false,
+      twoFactorEnabled: userInfo.two_factor_enabled !== undefined ? userInfo.two_factor_enabled : userInfo.twoFactorEnabled !== undefined ? userInfo.twoFactorEnabled : false,
+      timezone: userInfo.timezone || 'UTC',
+      language: userInfo.language || 'zh-CN',
+      lastLoginAt: userInfo.last_login_at || userInfo.lastLoginAt,
+      createdAt: userInfo.created_at || userInfo.createdAt || new Date().toISOString(),
+      updatedAt: userInfo.updated_at || userInfo.updatedAt || new Date().toISOString()
+    };
+
+    console.log('✅ Constructed User:', user);
+
+    const loginResponse = {
+      user,
       accessToken,
       refreshToken: refreshToken || '',
       expiresIn: result.expires_in || result.expiresIn || 3600,
       permissions: result.permissions || []
     };
+
+    console.log('✅ Final Login Response:', loginResponse);
+
+    return loginResponse;
   }
 
   /**
@@ -160,10 +197,33 @@ class AuthApiService {
    * 获取用户个人资料
    */
   async getProfile(): Promise<User> {
-    const response = await httpClient.get<User>(
+    const response = await httpClient.get<any>(
       API_CONFIG.ENDPOINTS.AUTH.PROFILE
     );
-    return response.data;
+
+    // 后端返回格式: { code, content: { user_info, security_info }, msg }
+    const result = response.content || response.data || response;
+    const userInfo = result.user_info || result.user || result;
+
+    // 转换字段名（蛇形命名 -> 驼峰命名）
+    return {
+      id: userInfo.user_id?.toString() || userInfo.id || '',
+      username: userInfo.username || '',
+      email: userInfo.email || '',
+      displayName: userInfo.display_name || userInfo.displayName || userInfo.username || '',
+      avatarUrl: userInfo.avatar_url || userInfo.avatarUrl || undefined,
+      status: userInfo.status || 'active',
+      platformRole: userInfo.platform_role || userInfo.platformRole || 'platform_user',
+      role: userInfo.role || userInfo.platform_role || userInfo.platformRole || 'platform_user',
+      permissions: userInfo.permissions || [],
+      emailVerified: userInfo.email_verified !== undefined ? userInfo.email_verified : false,
+      twoFactorEnabled: userInfo.two_factor_enabled !== undefined ? userInfo.two_factor_enabled : false,
+      timezone: userInfo.timezone || 'UTC',
+      language: userInfo.language || 'zh-CN',
+      lastLoginAt: userInfo.last_login_at || userInfo.lastLoginAt,
+      createdAt: userInfo.created_at || userInfo.createdAt || new Date().toISOString(),
+      updatedAt: userInfo.updated_at || userInfo.updatedAt || new Date().toISOString()
+    };
   }
 
   /**

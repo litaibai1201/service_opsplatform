@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/services/api/authApi';
 import { storage } from '@/services/api/apiConfig';
@@ -57,24 +57,39 @@ export const useAuth = (): UseAuthReturn => {
     error: null,
   });
 
+  // 使用 useRef 跟踪初始化状态，防止多次初始化
+  const initializeRef = useRef(false);
+
   // 初始化认证状态
   const initialize = useCallback(async () => {
+    // 防止重复初始化
+    if (initializeRef.current) {
+      console.log('⏭️ Initialize already called, skipping...');
+      return;
+    }
+
+    initializeRef.current = true;
+    console.log('🔄 Initializing auth state...');
+
     try {
       setState(prev => ({ ...prev, isLoading: true }));
-      
+
       const token = storage.getToken();
       if (!token) {
-        setState(prev => ({ 
-          ...prev, 
-          isLoading: false, 
-          isInitialized: true 
+        console.log('❌ No token found');
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          isInitialized: true
         }));
         return;
       }
 
+      console.log('✅ Token found, fetching profile...');
       // 验证 token 有效性并获取用户信息
       const user = await authApi.getProfile();
-      
+
+      console.log('✅ Profile fetched:', user);
       setState(prev => ({
         ...prev,
         user,
@@ -85,6 +100,7 @@ export const useAuth = (): UseAuthReturn => {
         error: null,
       }));
     } catch (error) {
+      console.error('❌ Initialize failed:', error);
       // Token 无效，清除本地存储
       storage.clearAuth();
       setState(prev => ({
@@ -103,30 +119,40 @@ export const useAuth = (): UseAuthReturn => {
   const login = useCallback(async (data: LoginRequest): Promise<LoginResponse | null> => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      
+
       const response = await authApi.login(data);
-      
+
+      // 验证响应数据
+      if (!response || !response.user || !response.accessToken) {
+        throw new Error('登录响应数据不完整');
+      }
+
       // 存储 token
       storage.setToken(response.accessToken);
       storage.setRefreshToken(response.refreshToken);
-      
+
+      // 确保 user 对象和 permissions 字段都有值
+      const user = response.user;
+      const permissions = response.permissions || user.permissions || [];
+
       setState(prev => ({
         ...prev,
-        user: response.user,
+        user: user,
         isAuthenticated: true,
-        permissions: response.permissions,
+        permissions: permissions,
         isLoading: false,
+        isInitialized: true,  // 设置为 true，防止再次调用 initialize
         error: null,
       }));
-      
+
       showToast.success('登录成功');
       return response;
     } catch (error: any) {
       const errorMessage = error.message || '登录失败';
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: errorMessage 
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage
       }));
       showToast.error(errorMessage);
       return null;
@@ -368,12 +394,11 @@ export const useAuth = (): UseAuthReturn => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  // 初始化
+  // 初始化 - 只在组件挂载时执行一次
   useEffect(() => {
-    if (!state.isInitialized) {
-      initialize();
-    }
-  }, [initialize, state.isInitialized]);
+    initialize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     // 状态

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAppSelector } from '@/store';
+import { selectIsAuthenticated } from '@/store/slices/authSlice';
+import { authApi } from '@/services/api/authApi';
 import { Button, Input, Checkbox, Tooltip } from '@/components/ui';
+import { showToast } from '@/components/ui/ToastContainer';
 // AuthLayout is handled by App.tsx routing
 import { validateEmail, validatePassword, validateUsername } from '@/utils/validation';
 import { EyeIcon, EyeSlashIcon, InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
@@ -34,8 +37,8 @@ interface ValidationState {
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register, isLoading, isAuthenticated, error, clearError } = useAuth();
-  
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
   const [formData, setFormData] = useState<FormData>({
     username: '',
     email: '',
@@ -48,6 +51,7 @@ const RegisterPage: React.FC = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [validationState, setValidationState] = useState<ValidationState>({
     username: null,
     email: null,
@@ -61,25 +65,17 @@ const RegisterPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // 清除错误
-  useEffect(() => {
-    if (error) {
-      setFormErrors(prev => ({ ...prev, general: error }));
-    }
-  }, [error]);
-
   // 检查用户名可用性
   const checkUsernameAvailability = async (username: string) => {
     if (!username || !validateUsername(username)) return;
 
     setValidationState(prev => ({ ...prev, username: 'checking' }));
-    
+
     try {
-      const { authApi } = await import('@/services/api/authApi');
       const result = await authApi.checkUsernameAvailability(username);
-      setValidationState(prev => ({ 
-        ...prev, 
-        username: result.available ? 'available' : 'unavailable' 
+      setValidationState(prev => ({
+        ...prev,
+        username: result.available ? 'available' : 'unavailable'
       }));
     } catch (error) {
       setValidationState(prev => ({ ...prev, username: null }));
@@ -91,13 +87,12 @@ const RegisterPage: React.FC = () => {
     if (!email || !validateEmail(email)) return;
 
     setValidationState(prev => ({ ...prev, email: 'checking' }));
-    
+
     try {
-      const { authApi } = await import('@/services/api/authApi');
       const result = await authApi.checkEmailAvailability(email);
-      setValidationState(prev => ({ 
-        ...prev, 
-        email: result.available ? 'available' : 'unavailable' 
+      setValidationState(prev => ({
+        ...prev,
+        email: result.available ? 'available' : 'unavailable'
       }));
     } catch (error) {
       setValidationState(prev => ({ ...prev, email: null }));
@@ -112,13 +107,12 @@ const RegisterPage: React.FC = () => {
     }
 
     setValidationState(prev => ({ ...prev, inviteCode: 'checking' }));
-    
+
     try {
-      const { authApi } = await import('@/services/api/authApi');
       const result = await authApi.validateInviteCode(code);
-      setValidationState(prev => ({ 
-        ...prev, 
-        inviteCode: result.valid ? 'valid' : 'invalid' 
+      setValidationState(prev => ({
+        ...prev,
+        inviteCode: result.valid ? 'valid' : 'invalid'
       }));
     } catch (error) {
       setValidationState(prev => ({ ...prev, inviteCode: 'invalid' }));
@@ -131,14 +125,13 @@ const RegisterPage: React.FC = () => {
   ) => {
     const value = e.target.value;
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // 清除相关错误
     if (formErrors[field as keyof FormErrors]) {
       setFormErrors(prev => ({ ...prev, [field]: undefined }));
     }
     if (formErrors.general) {
       setFormErrors(prev => ({ ...prev, general: undefined }));
-      clearError();
     }
   };
 
@@ -237,23 +230,27 @@ const RegisterPage: React.FC = () => {
   // 处理表单提交
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
-    const registerData: RegisterRequest = {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      confirmPassword: formData.confirmPassword,
-      inviteCode: formData.inviteCode || undefined,
-      agreementAccepted: formData.agreementAccepted,
-    };
+    setIsLoading(true);
+    setFormErrors({});
 
-    const result = await register(registerData);
+    try {
+      const registerData: RegisterRequest = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        inviteCode: formData.inviteCode || undefined,
+        agreementAccepted: formData.agreementAccepted,
+      };
 
-    // 注册成功时，result 不为 null
-    if (result && typeof result === 'object') {
+      const result = await authApi.register(registerData);
+
+      // 注册成功
       if (result.requiresEmailVerification) {
+        showToast.success('注册成功，请查收邮件完成验证');
         navigate('/verify-email', {
           state: {
             email: formData.email,
@@ -261,14 +258,20 @@ const RegisterPage: React.FC = () => {
           }
         });
       } else {
+        showToast.success('注册成功，请登录');
         navigate('/login', {
           state: {
             message: '注册成功，请登录'
           }
         });
       }
+    } catch (error: any) {
+      const errorMessage = error.message || '注册失败';
+      setFormErrors({ general: errorMessage });
+      showToast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
-    // 注册失败时，result 为 null，错误信息已通过 toast 显示，这里不需要额外处理
   };
 
   // 获取验证状态图标
