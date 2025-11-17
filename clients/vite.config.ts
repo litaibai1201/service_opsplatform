@@ -25,12 +25,12 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',  // 指向 API Gateway
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, '')  // 移除 /api 前缀
       },
       '/ws': {
-        target: 'ws://localhost:8001',
+        target: 'ws://localhost:8080',  // WebSocket 也指向 Gateway
         ws: true,
         changeOrigin: true
       }
