@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import {
@@ -17,6 +18,7 @@ import {
 import { cn } from '@/utils/helpers';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { setTheme } from '@/store/slices/uiSlice';
+import { logout } from '@/store/slices/authSlice';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -24,15 +26,16 @@ interface HeaderProps {
   isSidebarOpen: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  onToggleSidebar, 
-  onToggleMobileMenu, 
-  isSidebarOpen 
+const Header: React.FC<HeaderProps> = ({
+  onToggleSidebar,
+  onToggleMobileMenu,
+  isSidebarOpen
 }) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { theme } = useAppSelector(state => state.ui);
   const { user } = useAppSelector(state => state.auth);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications] = useState([
     { id: 1, title: '新项目邀请', message: '您被邀请加入项目 "API Gateway 设计"', time: '5分钟前', unread: true },
@@ -51,8 +54,17 @@ const Header: React.FC<HeaderProps> = ({
     dispatch(setTheme({ mode: newTheme }));
   };
 
-  const handleLogout = () => {
-    console.log('退出登录');
+  const handleLogout = async () => {
+    try {
+      // 调用退出登录 action
+      await dispatch(logout()).unwrap();
+      // 跳转到登录页
+      navigate('/login', { replace: true });
+    } catch (error) {
+      // 即使退出失败也跳转到登录页
+      console.error('退出登录失败:', error);
+      navigate('/login', { replace: true });
+    }
   };
 
   const themeIcons = {
