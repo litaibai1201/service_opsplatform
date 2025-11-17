@@ -8,6 +8,27 @@
 - Node.js 18.0+
 - pnpm 8.0+ (推荐) 或 npm/yarn
 
+### 环境配置
+
+**重要**: 本项目采用微服务架构，前端通过 **API Gateway** 访问后端服务。
+
+1. **复制环境配置文件**：
+```bash
+cp .env.example .env.development
+```
+
+2. **配置 API Gateway 地址**：
+```bash
+# .env.development
+VITE_API_BASE_URL=http://localhost:8080  # API 网关地址
+VITE_WS_BASE_URL=ws://localhost:8080     # WebSocket 地址
+```
+
+**服务端口说明**：
+- **8080**: API Gateway（统一入口，所有请求通过此端口）
+- **8000**: auth_service（认证服务，内部端口）
+- **其他端口**: 各微服务独立端口（不直接暴露给前端）
+
 ### 安装依赖
 ```bash
 pnpm install
@@ -16,6 +37,13 @@ pnpm install
 ### 启动开发服务器
 ```bash
 pnpm dev
+```
+
+**注意**: 启动前端前，请确保 API Gateway 服务已启动：
+```bash
+# 在项目根目录运行 API Gateway
+cd ../api_gateway_service
+python app.py
 ```
 
 ### 构建生产版本
@@ -77,6 +105,64 @@ src/
 │   └── helpers/            # 辅助函数
 └── styles/                 # 样式文件
 ```
+
+## 🏗 微服务架构
+
+本项目采用微服务架构，前后端通过 API Gateway 进行通信。
+
+### 架构图
+
+```
+┌─────────────┐
+│   Client    │  前端应用 (React)
+│  (Port: --)  │
+└──────┬──────┘
+       │
+       │ HTTP/WebSocket
+       ▼
+┌─────────────────────┐
+│   API Gateway       │  统一入口 (负载均衡、路由、限流)
+│   (Port: 8080)      │
+└──────┬──────────────┘
+       │
+       ├──────────────────┬──────────────┬─────────────┐
+       ▼                  ▼              ▼             ▼
+┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐
+│Auth Service│  │Team Service│  │Project Svc │  │其他服务... │
+│(Port: 8000)│  │(独立端口) │  │(独立端口)  │  │(独立端口)  │
+└────────────┘  └────────────┘  └────────────┘  └────────────┘
+```
+
+### 请求流程
+
+1. **前端发起请求** → `http://localhost:8080/auth/login`
+2. **API Gateway 接收** → 验证、限流、路由
+3. **转发到后端服务** → `auth_service:8000/auth/login`
+4. **服务处理并返回** → Gateway → Client
+
+### API Gateway 功能
+
+- ✅ **统一入口**: 所有后端请求统一通过 Gateway
+- ✅ **路由转发**: 根据 URL 路径转发到对应的微服务
+- ✅ **负载均衡**: 支持轮询、权重等策略
+- ✅ **限流熔断**: 防止服务过载
+- ✅ **认证鉴权**: 统一的 JWT 验证
+- ✅ **日志监控**: 请求日志和性能监控
+
+### 为什么使用 API Gateway？
+
+**传统方式的问题**:
+- ❌ 前端需要知道所有微服务的地址和端口
+- ❌ 跨域配置复杂，每个服务都需要配置 CORS
+- ❌ 认证逻辑分散在各个服务中
+- ❌ 难以实现统一的日志和监控
+
+**使用 Gateway 的优势**:
+- ✅ 前端只需要知道一个地址（Gateway）
+- ✅ 统一的 CORS 配置
+- ✅ 集中式的认证和权限控制
+- ✅ 统一的日志、监控、限流、熔断
+- ✅ 易于扩展和维护
 
 ## 🛠 技术栈
 
@@ -213,12 +299,37 @@ pnpm build
 ```
 
 ### 环境变量
-创建 `.env.local` 文件：
+
+**开发环境** (`.env.development`):
 ```bash
-VITE_API_BASE_URL=http://localhost:8000
-VITE_WS_BASE_URL=ws://localhost:8001
+# API Gateway 地址 (本地开发)
+VITE_API_BASE_URL=http://localhost:8080
+VITE_WS_BASE_URL=ws://localhost:8080
+
+# 应用配置
+VITE_APP_NAME=Service Ops Platform (Dev)
+VITE_APP_VERSION=1.0.0-dev
+VITE_ENV=development
+
+# 功能开关
+VITE_DEBUG=true
+VITE_ENABLE_API_LOG=true
+```
+
+**生产环境** (`.env.production`):
+```bash
+# API Gateway 地址 (生产环境)
+VITE_API_BASE_URL=https://api.yourcompany.com
+VITE_WS_BASE_URL=wss://api.yourcompany.com
+
+# 应用配置
 VITE_APP_NAME=Service Ops Platform
 VITE_APP_VERSION=1.0.0
+VITE_ENV=production
+
+# 功能开关
+VITE_DEBUG=false
+VITE_ENABLE_API_LOG=false
 ```
 
 ### Docker 部署

@@ -1,10 +1,10 @@
 // API 配置
 export const API_CONFIG = {
-  // 基础 URL
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  
+  // 基础 URL - 指向 API Gateway
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+
   // WebSocket URL
-  WS_BASE_URL: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8001',
+  WS_BASE_URL: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080',
   
   // 超时配置
   TIMEOUT: 10000, // 10秒

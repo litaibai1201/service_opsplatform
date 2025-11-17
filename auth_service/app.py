@@ -60,7 +60,17 @@ def check_if_token_revoked(jwt_header, jwt_payload):
 
 
 def create_app(app):
-    CORS(app, supports_credentials=True)
+    # CORS 配置 - 允许跨域请求（接受来自 Gateway 和前端的请求）
+    CORS(app,
+         resources={r"/*": {
+             "origins": ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
+             "allow_headers": ["Content-Type", "Authorization", "X-Request-ID", "x-request-id"],
+             "expose_headers": ["Content-Type", "Authorization", "X-Request-ID"],
+             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+             "supports_credentials": True,
+             "max_age": 3600
+         }})
+
     app.config["Access-Control-Allow-Origin"] = "*"
     app.config["API_TITLE"] = "Auth REST API"
     app.config["API_VERSION"] = "v1"
@@ -73,11 +83,20 @@ def create_app(app):
     app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ECHO"] = False
+
+    # SQLAlchemy 连接池配置 - 防止连接丢失
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_pre_ping": True,           # 使用前测试连接是否有效
+        "pool_recycle": 3600,             # 1小时后回收连接
+        "pool_size": 10,                  # 连接池大小
+        "max_overflow": 20,               # 超出pool_size后最多创建的连接数
+        "pool_timeout": 30,               # 获取连接的超时时间
+        "echo": False                     # 不打印SQL语句
+    }
     app.config["REDIS_URL"] = REDIS_DATABASE_URI
     app.config["REDIS_RESPONSE"] = True
     app.config["PROPAGATE_EXCEPTIONS"] = True
     app.config["JSON_AS_ASCII"] = False
-    app.config["CORS_HEADERS"] = "Content-Type"
     app.config["KEEP_ALIVE"] = False
     app.config["JWT_ALGORITHM"] = "HS256"
     app.config["JWT_SECRET_KEY"] = "APIGateway2025!"
@@ -150,4 +169,4 @@ if __name__ == "__main__":
     app = create_app(app)
     print("===================Auth starting============================")
     # serve(app, host="0.0.0.0", port=8000, threads=30)
-    app.run(SERVER_HOST, 8000, debug=True)
+    app.run(SERVER_HOST, SERVER_PORT, debug=True)

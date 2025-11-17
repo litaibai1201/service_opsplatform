@@ -12,3 +12,19 @@ test.py
 *test_files
 *temp
 *node_modules
+
+# 前端环境变量
+.env
+.env.local
+.env*.local
+
+# 前端构建产物
+dist
+dist-ssr
+*.local
+
+# IDE
+.vscode
+.idea
+
+*DS_Store
