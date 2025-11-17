@@ -167,22 +167,24 @@ const ProjectMembersPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(value) => setSortBy(value as string)}
+              options={[
+                { value: 'assignedAt', label: '加入时间' },
+                { value: 'name', label: '姓名' },
+                { value: 'lastActivity', label: '最后活动' }
+              ]}
               className="w-32"
-            >
-              <option value="assignedAt">加入时间</option>
-              <option value="name">姓名</option>
-              <option value="lastActivity">最后活动</option>
-            </Select>
-            
+            />
+
             <Select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
+              onChange={(value) => setSortOrder(value as string)}
+              options={[
+                { value: 'desc', label: '降序' },
+                { value: 'asc', label: '升序' }
+              ]}
               className="w-32"
-            >
-              <option value="desc">降序</option>
-              <option value="asc">升序</option>
-            </Select>
+            />
             
             <Button variant="outline" size="sm">
               <FunnelIcon className="h-4 w-4 mr-2" />

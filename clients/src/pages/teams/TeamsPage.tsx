@@ -155,26 +155,28 @@ const TeamsPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(value) => setStatusFilter(value as string)}
+              options={[
+                { value: 'all', label: '所有状态' },
+                { value: 'active', label: '活跃' },
+                { value: 'archived', label: '已归档' },
+                { value: 'pending', label: '待处理' }
+              ]}
               className="w-32"
-            >
-              <option value="all">所有状态</option>
-              <option value="active">活跃</option>
-              <option value="archived">已归档</option>
-              <option value="pending">待处理</option>
-            </Select>
-            
+            />
+
             <Select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
+              onChange={(value) => setRoleFilter(value as string)}
+              options={[
+                { value: 'all', label: '所有角色' },
+                { value: 'owner', label: '所有者' },
+                { value: 'admin', label: '管理员' },
+                { value: 'member', label: '成员' }
+              ]}
               className="w-32"
-            >
-              <option value="all">所有角色</option>
-              <option value="owner">所有者</option>
-              <option value="admin">管理员</option>
-              <option value="member">成员</option>
-            </Select>
-            
+            />
+
             <Button variant="outline" size="sm">
               <FunnelIcon className="h-4 w-4 mr-2" />
               筛选

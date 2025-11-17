@@ -246,14 +246,15 @@ const ProjectSettingsPage: React.FC = () => {
                 </label>
                 <Select
                   value={formData.type}
-                  onChange={(e) => handleInputChange('type', e.target.value)}
-                >
-                  <option value="web">Web应用</option>
-                  <option value="mobile">移动应用</option>
-                  <option value="api">API服务</option>
-                  <option value="desktop">桌面应用</option>
-                  <option value="library">代码库</option>
-                </Select>
+                  onChange={(value) => handleInputChange('type', value as string)}
+                  options={[
+                    { value: 'web', label: 'Web应用' },
+                    { value: 'mobile', label: '移动应用' },
+                    { value: 'api', label: 'API服务' },
+                    { value: 'desktop', label: '桌面应用' },
+                    { value: 'library', label: '代码库' }
+                  ]}
+                />
               </div>
 
               <div>
@@ -262,11 +263,12 @@ const ProjectSettingsPage: React.FC = () => {
                 </label>
                 <Select
                   value={formData.visibility}
-                  onChange={(e) => handleInputChange('visibility', e.target.value)}
-                >
-                  <option value="public">公开 - 所有人可见</option>
-                  <option value="private">私有 - 仅成员可见</option>
-                </Select>
+                  onChange={(value) => handleInputChange('visibility', value as string)}
+                  options={[
+                    { value: 'public', label: '公开 - 所有人可见' },
+                    { value: 'private', label: '私有 - 仅成员可见' }
+                  ]}
+                />
               </div>
 
               <div>
@@ -275,12 +277,13 @@ const ProjectSettingsPage: React.FC = () => {
                 </label>
                 <Select
                   value={formData.priority}
-                  onChange={(e) => handleInputChange('priority', e.target.value)}
-                >
-                  <option value="high">高优先级</option>
-                  <option value="medium">中优先级</option>
-                  <option value="low">低优先级</option>
-                </Select>
+                  onChange={(value) => handleInputChange('priority', value as string)}
+                  options={[
+                    { value: 'high', label: '高优先级' },
+                    { value: 'medium', label: '中优先级' },
+                    { value: 'low', label: '低优先级' }
+                  ]}
+                />
               </div>
 
               <div className="md:col-span-2">

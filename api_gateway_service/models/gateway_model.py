@@ -63,16 +63,58 @@ class OperApiRouteModel:
         ).all()
     
     def match_route(self, path, method):
-        """匹配路由规则"""
-        # 简化的路由匹配，实际应用中可以使用正则或更复杂的匹配逻辑
-        return self.model.query.filter(
-            and_(
-                self.model.path_pattern == path,
-                self.model.method.in_([method, 'ANY']),
-                self.model.is_active == True,
-                self.model.status == 1
-            )
-        ).order_by(self.model.priority.desc()).first()
+        """匹配路由规则（带缓存优化）"""
+        # 尝试从缓存获取
+        cache_key = f"route:{path}:{method}"
+
+        try:
+            from cache import redis_client
+            import json
+
+            # 1. 先从缓存查找
+            cached_route = redis_client.get(cache_key)
+            if cached_route:
+                # 反序列化缓存数据
+                route_data = json.loads(cached_route)
+                # 从数据库重新获取对象（保持ORM关系）
+                if route_data.get('id'):
+                    route = self.model.query.get(route_data['id'])
+                    if route and route.is_active and route.status == 1:
+                        return route
+
+            # 2. 缓存未命中，查询数据库
+            route = self.model.query.filter(
+                and_(
+                    self.model.path_pattern == path,
+                    self.model.method.in_([method, 'ANY']),
+                    self.model.is_active == True,
+                    self.model.status == 1
+                )
+            ).order_by(self.model.priority.desc()).first()
+
+            # 3. 缓存结果（5分钟）
+            if route:
+                route_data = {
+                    'id': route.id,
+                    'service_name': route.service_name,
+                    'path_pattern': route.path_pattern
+                }
+                redis_client.setex(cache_key, 300, json.dumps(route_data))
+
+            return route
+
+        except Exception as e:
+            # 缓存失败不影响正常流程，直接查数据库
+            from loggers import logger
+            logger.warning(f"路由缓存失败，使用数据库查询: {str(e)}")
+            return self.model.query.filter(
+                and_(
+                    self.model.path_pattern == path,
+                    self.model.method.in_([method, 'ANY']),
+                    self.model.is_active == True,
+                    self.model.status == 1
+                )
+            ).order_by(self.model.priority.desc()).first()
     
     @TryExcept("更新路由配置失敗")
     def update_route(self, route_id, update_data):
@@ -80,20 +122,45 @@ class OperApiRouteModel:
         route = self.get_by_id(route_id)
         if not route:
             raise ValueError("路由配置不存在")
-        
+
+        # 保存旧的路径和方法用于清除缓存
+        old_path = route.path_pattern
+        old_method = route.method
+
         allowed_fields = [
             'service_name', 'path_pattern', 'target_url', 'method', 'version',
-            'is_active', 'requires_auth', 'required_permissions', 
+            'is_active', 'requires_auth', 'required_permissions',
             'permission_check_strategy', 'rate_limit_rpm', 'timeout_seconds',
             'retry_count', 'circuit_breaker_enabled', 'cache_enabled',
             'cache_ttl_seconds', 'load_balance_strategy', 'priority'
         ]
-        
+
         for field, value in update_data.items():
             if field in allowed_fields and hasattr(route, field):
                 setattr(route, field, value)
-        
+
         route.updated_at = CommonTools.get_now()
+
+        # 清除缓存
+        try:
+            from cache import redis_client
+            # 清除旧的缓存
+            if old_method == 'ANY':
+                for method in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
+                    redis_client.delete(f"route:{old_path}:{method}")
+            else:
+                redis_client.delete(f"route:{old_path}:{old_method}")
+
+            # 如果路径或方法改变了，也清除新的缓存键
+            if route.path_pattern != old_path or route.method != old_method:
+                if route.method == 'ANY':
+                    for method in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
+                        redis_client.delete(f"route:{route.path_pattern}:{method}")
+                else:
+                    redis_client.delete(f"route:{route.path_pattern}:{route.method}")
+        except:
+            pass  # 缓存清除失败不影响主流程
+
         return True
     
     @TryExcept("刪除路由配置失敗")
@@ -102,7 +169,18 @@ class OperApiRouteModel:
         route = self.get_by_id(route_id)
         if not route:
             raise ValueError("路由配置不存在")
-        
+
+        # 清除缓存
+        try:
+            from cache import redis_client
+            if route.method == 'ANY':
+                for method in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
+                    redis_client.delete(f"route:{route.path_pattern}:{method}")
+            else:
+                redis_client.delete(f"route:{route.path_pattern}:{route.method}")
+        except:
+            pass  # 缓存清除失败不影响主流程
+
         route.status = -1
         route.status_update_at = CommonTools.get_now()
         return True

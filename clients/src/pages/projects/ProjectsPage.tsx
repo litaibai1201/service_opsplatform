@@ -155,30 +155,32 @@ const ProjectsPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(value) => setStatusFilter(value as string)}
+              options={[
+                { value: 'all', label: '所有状态' },
+                { value: 'active', label: '进行中' },
+                { value: 'completed', label: '已完成' },
+                { value: 'paused', label: '已暂停' },
+                { value: 'archived', label: '已归档' },
+                { value: 'planning', label: '规划中' }
+              ]}
               className="w-32"
-            >
-              <option value="all">所有状态</option>
-              <option value="active">进行中</option>
-              <option value="completed">已完成</option>
-              <option value="paused">已暂停</option>
-              <option value="archived">已归档</option>
-              <option value="planning">规划中</option>
-            </Select>
-            
+            />
+
             <Select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
+              onChange={(value) => setTypeFilter(value as string)}
+              options={[
+                { value: 'all', label: '所有类型' },
+                { value: 'web', label: 'Web应用' },
+                { value: 'mobile', label: '移动应用' },
+                { value: 'api', label: 'API服务' },
+                { value: 'desktop', label: '桌面应用' },
+                { value: 'library', label: '代码库' }
+              ]}
               className="w-32"
-            >
-              <option value="all">所有类型</option>
-              <option value="web">Web应用</option>
-              <option value="mobile">移动应用</option>
-              <option value="api">API服务</option>
-              <option value="desktop">桌面应用</option>
-              <option value="library">代码库</option>
-            </Select>
-            
+            />
+
             <Button variant="outline" size="sm">
               <FunnelIcon className="h-4 w-4 mr-2" />
               筛选
