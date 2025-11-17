@@ -56,9 +56,11 @@ class GatewayMiddleware:
         # CORS 预检请求处理
         if request.method == 'OPTIONS':
             response = jsonify({'status': 'ok'})
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+            response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+            response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,PATCH,OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Request-ID,x-request-id'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '3600'
             return response
         
         return None
@@ -81,9 +83,11 @@ class GatewayMiddleware:
         response.headers['X-XSS-Protection'] = '1; mode=block'
         
         # 添加CORS头
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,PATCH,OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Request-ID,x-request-id'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Expose-Headers'] = 'X-Request-ID,X-Response-Time'
         
         return response
     
