@@ -1,0 +1,295 @@
+/**
+ * Ant Design 自定义样式
+ * 用于调整 Ant Design 组件以适配项目设计规范
+ */
+
+/* ==================== 全局样式 ==================== */
+
+/* 确保 Ant Design 和 Tailwind CSS 共存 */
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-picker {
+  @apply transition-all duration-200;
+}
+
+/* ==================== 布局相关 ==================== */
+
+/* 侧边栏菜单样式 */
+.ant-layout-sider {
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 顶部导航栏 */
+.ant-layout-header {
+  padding: 0 24px;
+  box-shadow: 0 1px 4px 0 rgba(0, 21, 41, 0.08);
+}
+
+/* ==================== 卡片样式 ==================== */
+
+.ant-card {
+  @apply shadow-sm hover:shadow-md transition-shadow;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+}
+
+/* ==================== 表格样式 ==================== */
+
+.ant-table-wrapper .ant-table {
+  @apply rounded-lg overflow-hidden;
+}
+
+.ant-table-thead > tr > th {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+  background: #fafafa;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #f5f5f5;
+}
+
+/* 表格操作按钮 */
+.table-actions {
+  @apply flex gap-2 items-center;
+}
+
+.table-actions .ant-btn-link {
+  @apply px-2 py-0 h-auto;
+}
+
+/* ==================== 表单样式 ==================== */
+
+.ant-form-item-label > label {
+  font-weight: 500;
+}
+
+.ant-form-item-required::before {
+  color: #ff4d4f !important;
+}
+
+/* ==================== 按钮样式 ==================== */
+
+.ant-btn-primary {
+  @apply shadow-sm hover:shadow;
+}
+
+.ant-btn-lg {
+  @apply h-10 px-6 text-base;
+}
+
+/* ==================== 模态框样式 ==================== */
+
+.ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ==================== 标签页样式 ==================== */
+
+.ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.ant-tabs-tab {
+  @apply transition-all duration-200;
+}
+
+/* ==================== 通知样式 ==================== */
+
+.ant-notification {
+  @apply rounded-lg shadow-lg;
+}
+
+/* ==================== 工具提示样式 ==================== */
+
+.ant-tooltip-inner {
+  @apply rounded px-3 py-2;
+}
+
+/* ==================== 下拉菜单样式 ==================== */
+
+.ant-dropdown-menu {
+  @apply rounded-lg shadow-lg;
+}
+
+.ant-dropdown-menu-item {
+  @apply transition-colors duration-200;
+}
+
+/* ==================== 抽屉样式 ==================== */
+
+.ant-drawer-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-drawer-footer {
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ==================== 空状态样式 ==================== */
+
+.ant-empty-description {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* ==================== 徽章样式 ==================== */
+
+.ant-badge-dot {
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* ==================== 步骤条样式 ==================== */
+
+.ant-steps-item-finish .ant-steps-item-icon {
+  border-color: #1890ff;
+}
+
+/* ==================== 进度条样式 ==================== */
+
+.ant-progress-text {
+  font-weight: 500;
+}
+
+/* ==================== 时间线样式 ==================== */
+
+.ant-timeline-item-content {
+  @apply ml-4;
+}
+
+/* ==================== 统计数值样式 ==================== */
+
+.ant-statistic-title {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 4px;
+}
+
+.ant-statistic-content {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* ==================== 描述列表样式 ==================== */
+
+.ant-descriptions-item-label {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+/* ==================== 树形控件样式 ==================== */
+
+.ant-tree-node-content-wrapper:hover {
+  background-color: #f5f5f5;
+}
+
+.ant-tree-node-selected {
+  background-color: #e6f7ff !important;
+}
+
+/* ==================== 上传组件样式 ==================== */
+
+.ant-upload-drag {
+  border: 1px dashed #d9d9d9;
+  @apply transition-all duration-200;
+}
+
+.ant-upload-drag:hover {
+  border-color: #1890ff;
+}
+
+/* ==================== 代码编辑器样式 ==================== */
+
+.code-editor-wrapper {
+  @apply border rounded-lg overflow-hidden;
+}
+
+/* ==================== 自定义工具类 ==================== */
+
+/* 卡片头部操作按钮 */
+.card-extra-actions {
+  @apply flex gap-2 items-center;
+}
+
+/* 页面头部 */
+.page-header {
+  @apply bg-white px-6 py-4 mb-6 rounded-lg shadow-sm;
+}
+
+/* 内容区域 */
+.content-wrapper {
+  @apply bg-white rounded-lg shadow-sm p-6;
+}
+
+/* 筛选器区域 */
+.filter-bar {
+  @apply bg-white p-4 mb-4 rounded-lg shadow-sm;
+}
+
+/* 数据展示区域 */
+.data-display {
+  @apply bg-white rounded-lg shadow-sm overflow-hidden;
+}
+
+/* 操作按钮组 */
+.action-buttons {
+  @apply flex gap-2 justify-end;
+}
+
+/* 状态标签 */
+.status-tag {
+  @apply inline-flex items-center px-2 py-1 rounded text-xs font-medium;
+}
+
+/* 响应式辅助类 */
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 16px;
+  }
+
+  .content-wrapper,
+  .page-header {
+    @apply px-4;
+  }
+}
+
+/* ==================== 暗色主题适配 ==================== */
+
+.dark-theme {
+  .ant-layout {
+    background: #141414;
+  }
+
+  .ant-card {
+    background: #1f1f1f;
+    border-color: #303030;
+  }
+
+  .content-wrapper,
+  .page-header {
+    background: #1f1f1f;
+    border-color: #303030;
+  }
+}
+
+/* ==================== 打印样式 ==================== */
+
+@media print {
+  .ant-btn,
+  .ant-pagination,
+  .ant-dropdown,
+  .ant-menu {
+    display: none !important;
+  }
+}

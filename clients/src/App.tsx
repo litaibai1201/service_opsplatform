@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { selectIsAuthenticated, selectAuthLoading, fetchUserProfile } from '@/store/slices/authSlice';
 import { setPageTitle } from '@/store/slices/uiSlice';
+import { antdTheme } from '@/theme/antdTheme';
+import 'antd/dist/reset.css';
 
 // 布局组件
 import MainLayout from '@/components/layout/MainLayout';
@@ -55,9 +59,13 @@ function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <div className="App">
-        <Routes>
+    <ConfigProvider
+      locale={zhCN}
+      theme={antdTheme}
+    >
+      <ErrorBoundary>
+        <div className="App">
+          <Routes>
           {/* 公开路由 - 仅在未登录时可访问 */}
           <Route path="/login" element={
             <PublicRoute>
@@ -166,10 +174,11 @@ function App() {
           <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
         </Routes>
 
-        {/* 全局组件 */}
-        <ToastContainer />
-      </div>
-    </ErrorBoundary>
+          {/* 全局组件 */}
+          <ToastContainer />
+        </div>
+      </ErrorBoundary>
+    </ConfigProvider>
   );
 }
 

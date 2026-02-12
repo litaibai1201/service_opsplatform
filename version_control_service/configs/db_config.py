@@ -14,7 +14,7 @@ db_account = secrets.db_account
 
 db_config_dict = {
     "mysql_db": {
-        "host": "114.33.127.60",
+        "host": "127.0.0.1",
         "port": 3306,
         "database_name": "api_gateway_service",
         "username": db_account["mysql_db"]["username"],

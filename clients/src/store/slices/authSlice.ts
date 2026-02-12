@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import type { User, LoginRequest, RegisterRequest, ApiResponse } from '@/types';
-import { storage } from '@/utils/helpers';
+import { storage } from '@/services/api/apiConfig';
 import { STORAGE_KEYS } from '@/utils/constants';
 
 // 异步 actions
@@ -137,9 +137,9 @@ interface AuthState {
 // 初始状态
 const initialState: AuthState = {
   user: null,
-  token: storage.get(STORAGE_KEYS.AUTH_TOKEN),
-  refreshToken: storage.get(STORAGE_KEYS.REFRESH_TOKEN),
-  isAuthenticated: Boolean(storage.get(STORAGE_KEYS.AUTH_TOKEN)),
+  token: storage.getToken(),
+  refreshToken: storage.getRefreshToken(),
+  isAuthenticated: Boolean(storage.getToken()),
   isLoading: false,
   error: null,
   lastActivity: null,
@@ -174,8 +174,8 @@ const authSlice = createSlice({
       state.error = null;
 
       // 保存到本地存储
-      storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
-      storage.set(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+      storage.setToken(token);
+      storage.setRefreshToken(refreshToken);
     },
 
     clearAuth: (state) => {
@@ -187,8 +187,7 @@ const authSlice = createSlice({
       state.lastActivity = null;
 
       // 清除本地存储
-      storage.remove(STORAGE_KEYS.AUTH_TOKEN);
-      storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
+      storage.clearAuth();
     },
   },
   extraReducers: (builder) => {
@@ -200,7 +199,7 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
-        
+
         if (action.payload.success && action.payload.data) {
           const { user, token, refreshToken } = action.payload.data;
           state.user = user;
@@ -208,10 +207,10 @@ const authSlice = createSlice({
           state.refreshToken = refreshToken;
           state.isAuthenticated = true;
           state.lastActivity = Date.now();
-          
+
           // 保存到本地存储
-          storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
-          storage.set(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          storage.setToken(token);
+          storage.setRefreshToken(refreshToken);
         }
       })
       .addCase(login.rejected, (state, action) => {
@@ -228,7 +227,7 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
-        
+
         if (action.payload.success && action.payload.data) {
           const { user, token, refreshToken } = action.payload.data;
           state.user = user;
@@ -236,10 +235,10 @@ const authSlice = createSlice({
           state.refreshToken = refreshToken;
           state.isAuthenticated = true;
           state.lastActivity = Date.now();
-          
+
           // 保存到本地存储
-          storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
-          storage.set(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          storage.setToken(token);
+          storage.setRefreshToken(refreshToken);
         }
       })
       .addCase(register.rejected, (state, action) => {
@@ -260,22 +259,20 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = null;
         state.lastActivity = null;
-        
+
         // 清除本地存储
-        storage.remove(STORAGE_KEYS.AUTH_TOKEN);
-        storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
+        storage.clearAuth();
       })
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || '登出失败';
-        
+
         // 即使登出失败，也清除本地状态
         state.user = null;
         state.token = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-        storage.remove(STORAGE_KEYS.AUTH_TOKEN);
-        storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
+        storage.clearAuth();
       });
 
     // 刷新令牌
@@ -286,10 +283,10 @@ const authSlice = createSlice({
           state.token = token;
           state.refreshToken = refreshToken;
           state.lastActivity = Date.now();
-          
+
           // 更新本地存储
-          storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
-          storage.set(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          storage.setToken(token);
+          storage.setRefreshToken(refreshToken);
         }
       })
       .addCase(refreshToken.rejected, (state, action) => {
@@ -298,10 +295,9 @@ const authSlice = createSlice({
         state.token = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-        
+
         // 清除本地存储
-        storage.remove(STORAGE_KEYS.AUTH_TOKEN);
-        storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
+        storage.clearAuth();
       });
 
     // 获取用户信息
@@ -320,15 +316,14 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || '获取用户信息失败';
-        
+
         // 如果是认证错误，清除认证状态
         if (action.payload?.includes('401') || action.payload?.includes('认证')) {
           state.user = null;
           state.token = null;
           state.refreshToken = null;
           state.isAuthenticated = false;
-          storage.remove(STORAGE_KEYS.AUTH_TOKEN);
-          storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
+          storage.clearAuth();
         }
       });
   },
