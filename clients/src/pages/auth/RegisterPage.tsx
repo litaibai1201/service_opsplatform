@@ -73,10 +73,17 @@ const RegisterPage: React.FC = () => {
 
     try {
       const result = await authApi.checkUsernameAvailability(username);
-      setValidationState(prev => ({
-        ...prev,
-        username: result.available ? 'available' : 'unavailable'
-      }));
+      // 防御性检查：确保 available 字段确实存在且为布尔值，
+      // 避免后端异常返回空对象时将 undefined 误判为 'unavailable'
+      if (typeof result.available === 'boolean') {
+        setValidationState(prev => ({
+          ...prev,
+          username: result.available ? 'available' : 'unavailable'
+        }));
+      } else {
+        // 响应格式异常，重置为 null 而非误报 'unavailable'
+        setValidationState(prev => ({ ...prev, username: null }));
+      }
     } catch (error) {
       setValidationState(prev => ({ ...prev, username: null }));
     }
@@ -90,10 +97,16 @@ const RegisterPage: React.FC = () => {
 
     try {
       const result = await authApi.checkEmailAvailability(email);
-      setValidationState(prev => ({
-        ...prev,
-        email: result.available ? 'available' : 'unavailable'
-      }));
+      // 防御性检查：确保 available 字段确实存在且为布尔值
+      if (typeof result.available === 'boolean') {
+        setValidationState(prev => ({
+          ...prev,
+          email: result.available ? 'available' : 'unavailable'
+        }));
+      } else {
+        // 响应格式异常，重置为 null 而非误报 'unavailable'
+        setValidationState(prev => ({ ...prev, email: null }));
+      }
     } catch (error) {
       setValidationState(prev => ({ ...prev, email: null }));
     }
@@ -200,10 +213,11 @@ const RegisterPage: React.FC = () => {
     }
 
     // 验证密码
+    // 注意: validatePassword 返回 { isValid: boolean, errors: string[] }，不是 boolean
     if (!formData.password) {
       errors.password = '请输入密码';
-    } else if (!validatePassword(formData.password)) {
-      errors.password = '密码长度至少8位，且包含字母和数字';
+    } else if (!validatePassword(formData.password).isValid) {
+      errors.password = validatePassword(formData.password).errors[0] || '密码长度至少8位，且包含字母和数字';
     }
 
     // 验证确认密码

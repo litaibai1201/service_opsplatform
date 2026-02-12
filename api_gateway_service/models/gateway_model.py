@@ -62,8 +62,50 @@ class OperApiRouteModel:
             )
         ).all()
     
+    def _match_path_pattern(self, pattern, path):
+        """检查路径是否匹配路由模式（支持通配符 *）
+
+        例如:
+          pattern="/auth/check-username/*", path="/auth/check-username/testuser" -> True
+          pattern="/auth/login", path="/auth/login" -> True
+          pattern="/teams/*/members", path="/teams/123/members" -> True
+        """
+        import fnmatch
+        return fnmatch.fnmatch(path, pattern)
+
+    def _match_route_from_db(self, path, method):
+        """从数据库查询并匹配路由（支持通配符）"""
+        # 1. 先尝试精确匹配（性能最优）
+        route = self.model.query.filter(
+            and_(
+                self.model.path_pattern == path,
+                self.model.method.in_([method, 'ANY']),
+                self.model.is_active == True,
+                self.model.status == 1
+            )
+        ).order_by(self.model.priority.desc()).first()
+
+        if route:
+            return route
+
+        # 2. 精确匹配失败，获取所有包含通配符的活跃路由进行模式匹配
+        wildcard_routes = self.model.query.filter(
+            and_(
+                self.model.path_pattern.like('%*%'),
+                self.model.method.in_([method, 'ANY']),
+                self.model.is_active == True,
+                self.model.status == 1
+            )
+        ).order_by(self.model.priority.desc()).all()
+
+        for route in wildcard_routes:
+            if self._match_path_pattern(route.path_pattern, path):
+                return route
+
+        return None
+
     def match_route(self, path, method):
-        """匹配路由规则（带缓存优化）"""
+        """匹配路由规则（带缓存优化，支持通配符 *）"""
         # 尝试从缓存获取
         cache_key = f"route:{path}:{method}"
 
@@ -82,15 +124,8 @@ class OperApiRouteModel:
                     if route and route.is_active and route.status == 1:
                         return route
 
-            # 2. 缓存未命中，查询数据库
-            route = self.model.query.filter(
-                and_(
-                    self.model.path_pattern == path,
-                    self.model.method.in_([method, 'ANY']),
-                    self.model.is_active == True,
-                    self.model.status == 1
-                )
-            ).order_by(self.model.priority.desc()).first()
+            # 2. 缓存未命中，查询数据库（支持通配符匹配）
+            route = self._match_route_from_db(path, method)
 
             # 3. 缓存结果（5分钟）
             if route:
@@ -107,14 +142,7 @@ class OperApiRouteModel:
             # 缓存失败不影响正常流程，直接查数据库
             from loggers import logger
             logger.warning(f"路由缓存失败，使用数据库查询: {str(e)}")
-            return self.model.query.filter(
-                and_(
-                    self.model.path_pattern == path,
-                    self.model.method.in_([method, 'ANY']),
-                    self.model.is_active == True,
-                    self.model.status == 1
-                )
-            ).order_by(self.model.priority.desc()).first()
+            return self._match_route_from_db(path, method)
     
     @TryExcept("更新路由配置失敗")
     def update_route(self, route_id, update_data):

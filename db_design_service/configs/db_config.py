@@ -29,7 +29,7 @@ db_config_dict = {
     "mongodb": {
         "host": "127.0.0.1",
         "port": 27017,
-        "database_name": "automl",
+        "database_name": "service_opsplatform",
         "username": db_account["mongodb"]["username"],
         "password": db_account["mongodb"]["password"],
     }

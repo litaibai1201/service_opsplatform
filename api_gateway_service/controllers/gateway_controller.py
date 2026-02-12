@@ -74,10 +74,34 @@ class GatewayController:
         }
     
     def _build_target_url(self, instance, route, path):
-        """构建目标URL"""
+        """构建目标URL（支持通配符路由模式）
+
+        当 path_pattern 和 target_url 都含有通配符 * 时，
+        需要将实际路径中通配符对应的部分保留到目标 URL 中。
+        例如:
+          path_pattern="/auth/check-username/*", target_url="/auth/check-username/*"
+          path="/auth/check-username/testuser"
+          -> target_path="/auth/check-username/testuser"
+        """
         base_url = f"{instance.protocol}://{instance.host}:{instance.port}"
-        # 简化的路径替换，实际应用中可能需要更复杂的路径映射
-        target_path = path.replace(route.path_pattern, route.target_url, 1)
+
+        pattern = route.path_pattern
+        target = route.target_url
+
+        if '*' in pattern:
+            # 通配符路由：提取通配符匹配的部分，替换到 target_url 中
+            # 将 pattern 按 * 分割为前缀和后缀
+            prefix = pattern.split('*')[0]
+            # 从实际路径中提取通配符匹配的部分
+            if path.startswith(prefix):
+                wildcard_value = path[len(prefix):]
+                target_path = target.replace('*', wildcard_value, 1)
+            else:
+                target_path = path
+        else:
+            # 精确匹配路由：直接替换
+            target_path = path.replace(pattern, target, 1)
+
         return f"{base_url}{target_path}"
     
     def _select_instance(self, instances, strategy='round_robin'):
